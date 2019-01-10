@@ -53,7 +53,6 @@ from os.path import abspath, exists
 
 LOGGER = logging.getLogger(__name__)
 
-
 class Csw(object):
     """ Base CSW server """
     def __init__(self, rtconfig=None, env=None, version='3.0.0'):
@@ -99,7 +98,7 @@ class Csw(object):
         if self.request_version == '2.0.2':
             self.iface = csw2.Csw2(server_csw=self)
             self.context.set_model('csw')
-
+        
         # load user configuration
         try:
             LOGGER.info('Loading user configuration')

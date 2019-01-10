@@ -1414,7 +1414,10 @@ class Csw2(object):
 
         LOGGER.debug('Transaction list: %s', self.parent.kvp['transactions'])
 
+        #print(self.parent.kvp['transactions'])
+
         for ttype in self.parent.kvp['transactions']:
+            print(ttype)
             if ttype['type'] == 'insert':
                 try:
                     record = metadata.parse_record(self.parent.context,
@@ -1487,6 +1490,7 @@ class Csw2(object):
                                         if value == rp['name']:  # match
                                             rp['rp'] = {'xpath': value, 'name': key}
                                             rp['rp']['dbcol'] = self.parent.repository.queryables['_all'][key]
+
                                             break
                             else:
                                 return self.exceptionreport('NoApplicableCode',
@@ -1494,6 +1498,19 @@ class Csw2(object):
                         else:
                             rp['rp']= \
                             self.parent.repository.queryables['_all'][rp['name']]
+
+                    # import the similaritycalculation
+                    # @author: Anika Graupner 
+                    from pycsw.similaritycalculation import similaritycalculation
+
+                    # get the id of the record which was sendet to the server from the cli tool to start the similarity calculation 
+                    print(ttype['constraint']['values'])
+                    values = ttype['constraint']['values']
+                    values = values[0]
+                    print(values)
+
+                    # start the calculation
+                    similaritycalculation.similaritycalculation(values)
 
                     LOGGER.debug('Record Properties: %s.', ttype['recordproperty'])
                     try:
