@@ -40,18 +40,22 @@ updatexml = """<?xml version="1.0" encoding="UTF-8"?>
 </csw:Transaction>
 """
 
-print(updatexml)
+#print(updatexml)
+
 date = time.strftime("%Y-%m-%d")
-print(date)
+
+#print(date)
+
 boundingbox = 'POLYGON((-180.00 -90.00, -180.00 90.00, 180.00 90.00, 180.00 -90.00, -180.00 -90.00))' #((minx, miny, minx, maxy, maxx, maxy, maxx, miny, minx, miny))'
 datebegin = '2019-01-04'
 dateend = '2019-01-08'
-fileformat = 'gdal'
+fileformat = 'testformat'
 identifier = 25 #wird in die Kommandozeile mit eingegeben 
 data = {'actual_date':date , 'bbox':boundingbox, 'date_begin':datebegin, 'date_end':dateend, 'file_format':fileformat, 'id':identifier}
 xml = updatexml%data
 print(xml)
 
+# send xml to server 
 r = requests.post('http://localhost:8000/csw', data=xml)
 
 print (r.content)
