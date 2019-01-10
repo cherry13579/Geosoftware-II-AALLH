@@ -46,7 +46,6 @@ from pycsw.core.formats.fmt_json import xml2dict
 from pycsw.ogc.fes import fes1
 import logging
 import urllib
-import sqlite3 # imported for connection on our own functions for the similarities functionalities 
 
 LOGGER = logging.getLogger(__name__)
 
@@ -58,12 +57,6 @@ class Csw2(object):
 
         self.parent = server_csw
         self.version = '2.0.2'
-
-    # Öffnen der Html page TAN
-    def extractmetadata(self):
-        print(os.getcwd())
-        f = codecs.open('/usr/lib/python3.5/site-packages/pycsw/page.html', 'r')
-        return f.read()
 
     def getcapabilities(self):
         ''' Handle GetCapabilities request '''
@@ -445,7 +438,7 @@ class Csw2(object):
         # first the connection is established to our database, to interact with the similarities table  
         # source: https://docs.python.org/3/library/sqlite3.html
         # @author: Aysel Tandik
-        conn = sqlite3.connect('../../db-data/data.db') # path to the database in the docker container 
+        conn = sqlite3.connect(os.path.join('..', '..', 'db-data', 'data.db')) # path to the database in the docker container 
         print(conn)
         c = conn.cursor()
  
@@ -629,8 +622,9 @@ class Csw2(object):
         # 05.12.18, source: https://docs.python.org/3/library/sqlite3.html
         # author: Aysel Tandik
         # connection to database 
+        import sqlite3 # imported for connection on our own functions for the similarities functionalities 
         print('getsimilaritybbox is running in csw2')
-        conn = sqlite3.connect('../../db-data/data.db')
+        conn = sqlite3.connect(os.path.join('..', '..', 'db-data', 'data.db'))
         c = conn.cursor()
 
         print(c.fetchone())
