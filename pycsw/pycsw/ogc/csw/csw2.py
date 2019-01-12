@@ -518,13 +518,9 @@ class Csw2(object):
                     i = 0
                     while i < len(values):
                         print(values[i])
-                        value = str(values[i])
-                        value = value.replace('(', '').replace(')', '')
-                        print(value)
-                        identifier, similarityValue = value.split(",")
-                        identifier = identifier.replace("'", '')
+                        identifier = str(values[i][0])
                         print(identifier)
-                        similarityValue = similarityValue.replace(' ', '')
+                        similarityValue = str(values[i][1])
                         print(similarityValue)
 
                         rec = etree.SubElement(listOfSimilarRecords, 'record')
@@ -611,13 +607,9 @@ class Csw2(object):
                     # mainly formatting 
                     while i < len(values):
                         print(values[i])
-                        value = str(values[i])
-                        value = value.replace('(', '').replace(')', '')
-                        print(value)
-                        identifier, similarityValue = value.split(",")
-                        identifier = identifier.replace("'", '')
+                        identifier = str(values[i][0])
                         print(identifier)
-                        similarityValue = similarityValue.replace(' ', '')
+                        similarityValue = str(values[i][1])
                         print(similarityValue)
 
                         rec = etree.SubElement(listOfSimilarRecords, 'record')
@@ -643,8 +635,6 @@ class Csw2(object):
         print('getsimilaritybbox is running in csw2')
         conn = sqlite3.connect(os.path.join('..', '..', 'db-data', 'data.db'))
         c = conn.cursor()
-
-        print(c.fetchone())
 
         # missing idone paramter in the request, so there is no "&idone="
         if 'idone' not in self.parent.kvp:
@@ -720,12 +710,7 @@ class Csw2(object):
         print(values)
 
         # get the value out of the list (0 because it can only be one value)
-        value = str(values[0])
-        print(value)
-
-        # mainly formatting 
-        value = value.replace('(', '').replace(')', '')
-        value = value.replace(',', '')
+        value = str(values[0][0])
         print(value)
 
         # add the value of the bbox to the response 
