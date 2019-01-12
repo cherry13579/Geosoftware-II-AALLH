@@ -1521,13 +1521,17 @@ class Csw2(object):
                     from pycsw.similaritycalculation import similaritycalculation
 
                     # get the id of the record which was sendet to the server from the cli tool to start the similarity calculation 
-                    print(ttype['constraint']['values'])
-                    values = ttype['constraint']['values']
-                    values = values[0]
-                    print(values)
+                    # print(ttype['constraint']['values'])
+                    sendid = ttype['constraint']['values']
+                    sendid = sendid[0]
+                    #print(values)
+                    sendbbox = ttype['recordproperty'][1]['value']
+                    sendbegin = ttype['recordproperty'][2]['value']
+                    sendend = ttype['recordproperty'][3]['value']
+                    sendformat = ttype['recordproperty'][4]['value']
 
                     # start the calculation
-                    similaritycalculation.similaritycalculation(values)
+                    similaritycalculation.similaritycalculation(sendid, sendbbox, sendbegin, sendend, sendformat)
 
                     LOGGER.debug('Record Properties: %s.', ttype['recordproperty'])
                     try:

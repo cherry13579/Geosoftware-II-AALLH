@@ -1,70 +1,60 @@
 import os
-import sys
-import functools
-import math
 import sqlite3
 
-conn = sqlite3.connect(os.path.join('..', '..', 'db-data', 'data.db')) # path to the database in the docker container 
+
+# connection to the database 
+conn = sqlite3.connect(os.path.join('..', '..', 'db-data', 'data.db')) 
 print(conn)
 c = conn.cursor()
 
-def similaritycalculation(id): 
-    '''@author: Anika Graupner'''
+
+#########################################################################
+# main function of the similarity calculation 
+# @author Anika Graupner 
+#########################################################################
+def similaritycalculation(id, bbox, timebegin, timeend, format): 
 
     print(id)
-    c.execute('SELECT format FROM records WHERE identifier = '+ id +'')
+    print(bbox)
+    print(timebegin)
+    print(timeend)
+    print(format)
+
+    # select all important values from the database for similarity calculation except the values of the updated record 
+    c.execute('SELECT identifier, title, time_begin, time_end, creator, wkt_geometry FROM records EXCEPT SELECT identifier, title, time_begin, time_end, creator, wkt_geometry FROM records WHERE identifier = '+ id +'')
     values = c.fetchall()
-    # es wird erst danach eingefügt, also schicken wir wohl die Parameter mit, ist auch sicherer
     print(values)
+    print(values[0][4])
+
+    if values[0][4] is None:
+        print('none')
+
+    # rows = []
+    # i = 0
+    # while i < len(values):
+
+        # no similarity calculation with records which have no time extend or spatial extend 
+        # if values[i][2] || values[i][3] || values[i][5 ]is None:
+
+        #     i++
+
+        
+        #else:
+
+            # hier müssen wir jetzt absprechen, wie die Daten formatiert sein müssen für die Berechnungen 
+            # dann wird das für jeden Datensatz durchlaufen und in eine Liste eingefügt, diese wird dann am Ende komplett in die DB eingefügt
+                # die einzelnen returns noch zusammen rechnen aber auch einzeln speichern (siehe insert unten)
+            # wir müssen noch das mit den Modulen klären, dafür ist wichtig, wie der ganze Kram nachher auf Docker geladen wird 
+            # WAS WENN DER GLEICHE DATENSATZ NOCHMAL ABGEDATED WIRD, vorher checken, ob es den primärschlüssel in der similarity tabelle schon gibt 
 
 
-##########################################################################
-# @author: Henry Fock 
+# INSERT
+# rows = [('2006-03-28', 'BUY', 'IBM', 1000, 45.00),
+#         ('2006-04-05', 'BUY', 'MSOFT', 1000, 72.00),
+#         ('2006-04-06', 'SELL', 'IBM', 500, 53.00)]
+# c.execute('insert into similarities values (record1, record2, total_similarity, geospatial_extent, temporal_extent, dataformat, title, author, bbox)', rows)
+# connection.commit()
 
-def sameDatatype(file1, file2):
-    filename1, file_extension1 = os.path.splitext(file1)
-    filename2, file_extension2 = os.path.splitext(file2)
 
-    same1, same2 = 0,0
-    same1 = file_extension1.find(file_extension2) # 2 in 1
-    same2 = file_extension2.find(file_extension1) # 1 in 2
 
-    return 100 if same1>=0 or same2>=0 else 0
-
-def sameAuthor(file1, file2):
-    author1 = ""
-    author2 = ""
-
-    return 100 if author1.lower() == author2.lower() else 0
-
-def similarTitle(file1, file2):
-    filename1, file_extension1 = os.path.splitext(file1)
-    filename2, file_extension2 = os.path.splitext(file2)
-
-    countList = 0
-    if len(filename1) >= len(filename2):
-        # searches for same caracters in both strings
-        charList = []
-        for i in filename2:
-            if i not in charList:
-                charList.append(i)
-                countList += filename1.count(i)
-        percent = 0
-        if len(filename1) != 0:
-            percent = countList*100/len(filename1)
-            percent = math.floor(percent*100)/100
-        return percent
-    else:
-        charList = []
-        for i in filename1:
-            if i not in charList:
-                charList.append(i)
-                countList += filename2.count(i)
-        percent = 0
-        if len(filename2) != 0:
-            percent = countList*100/len(filename2)
-            percent = math.floor(percent*100)/100
-        return percent
-
-print(similarTitle("FeatureCollection.json","geoTiffTest.tif"))
 
