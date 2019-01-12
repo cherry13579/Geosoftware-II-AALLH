@@ -31,11 +31,11 @@ def sameDatatype(file1, file2):
 
     return 100 if same1>=0 or same2>=0 else 0
 
-# def sameAuthor(file1, file2):
-#     author1 = ""
-#     author2 = ""
+def sameAuthor(file1, file2):
+    author1 = ""
+    author2 = ""
 
-#     return 100 if author1.lower() == author2.lower() else 0
+    return 100 if author1.lower() == author2.lower() else 0
 
 def similarTitle(file1, file2):
     filename1, file_extension1 = os.path.splitext(file1)

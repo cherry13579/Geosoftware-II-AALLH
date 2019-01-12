@@ -444,13 +444,13 @@ class Csw2(object):
  
         # missing id paramter in the request, so there is no "&id="
         if 'id' not in self.parent.kvp:
-            return self.exceptionreport('MissingParameterValue', 'id',
+            return self.exceptionreportahl('MissingParameterValue', 'id',
             'Missing id parameter')
 
         # when there is no value behind the id paramter, only "&id="
         if len(self.parent.kvp['id']) < 1:
-            return self.exceptionreport('InvalidParameterValue', 'id',
-            'Invalid id parameter')
+            return self.exceptionreportahl('InvalidParameterValue', 'id',
+            'Invalid id parameter. No id available.')
 
         # multiple ids will be seperated by commas 
         if self.parent.requesttype == 'GET':
@@ -461,7 +461,7 @@ class Csw2(object):
             self.parent.kvp['outputformat'] not in
             self.parent.context.model['operations']['GetSimilarRecords']['parameters']
             ['outputFormat']['values']):
-            return self.exceptionreport('InvalidParameterValue',
+            return self.exceptionreportahl('InvalidParameterValue',
             'outputformat', 'Invalid outputformat parameter %s' %
             self.parent.kvp['outputformat'])
         
@@ -540,15 +540,32 @@ class Csw2(object):
         # when a similar parameter is given in the request
         else:
 
+            # multiple similar parameter values will be seperated by commas 
+            if self.parent.requesttype == 'GET':
+                self.parent.kvp['similar'] = self.parent.kvp['similar'].split(',')
+
             # when there is no value behind the similar paramter, only "&similar="
             if len(self.parent.kvp['similar']) < 1:
-                return self.exceptionreport('InvalidParameterValue', 'similar',
-                'Invalid similar parameter')
+                return self.exceptionreportahl('InvalidParameterValue', 'similar',
+                'Invalid similar parameter. No value specified.')
             
             # when there are more than one value behind the similar paramter
             if len(self.parent.kvp['similar']) > 1:
-                return self.exceptionreport('InvalidParameterValue', 'similar',
+                return self.exceptionreportahl('InvalidParameterValue', 'similar',
                 'Invalid similar parameter. May only have one value.') 
+
+            # checks if the value of the similar parameter is an integer 
+            if not self.parent.kvp['similar'][0].isdigit():
+                return self.exceptionreportahl('InvalidParameterValue', 'similar',
+                'Invalid similar parameter. The value must be an integer.')
+
+            similarparamvalue = int(self.parent.kvp['similar'][0])
+
+            # when the value of the similar parameter value is not between 1 and 40 
+            # 40 is the maximum value we set
+            if similarparamvalue not in range(1,40):
+                return self.exceptionreportahl('InvalidParameterValue', 'similar',
+                'Invalid similar parameter. The value must be between 1 and 40.') 
 
             # get the value of the similar parameter from the request 
             requestSimilar = self.parent.kvp['similar'][0]
@@ -631,12 +648,12 @@ class Csw2(object):
 
         # missing idone paramter in the request, so there is no "&idone="
         if 'idone' not in self.parent.kvp:
-            return self.exceptionreport('MissingParameterValue', 'idone',
+            return self.exceptionreportahl('MissingParameterValue', 'idone',
             'Missing idone parameter')
         
         # missing idtwo paramter in the request, so there is no "&idtwo=" 
         if 'idtwo' not in self.parent.kvp:
-            return self.exceptionreport('MissingParameterValue', 'idtwo',
+            return self.exceptionreportahl('MissingParameterValue', 'idtwo',
             'Missing idtwo parameter')
 
         # split with comma
@@ -648,22 +665,22 @@ class Csw2(object):
 
         # when there is no value behind the idone paramter, only "&idone="
         if len(self.parent.kvp['idone']) < 1:
-            return self.exceptionreport('InvalidParameterValue', 'idone',
+            return self.exceptionreportahl('InvalidParameterValue', 'idone',
             'Invalid idone parameter')
         
         # when there is more than one value behind the idone paramter (first .split(,))
         if len(self.parent.kvp['idone']) > 1:
-            return self.exceptionreport('InvalidParameterValue', 'idone',
+            return self.exceptionreportahl('InvalidParameterValue', 'idone',
             'Invalid idone parameter. May have only one value.')
         
         # when there is no value behind the idtwo paramter, only "&idtwo=" ((first .split(,))
         if len(self.parent.kvp['idtwo']) < 1:
-            return self.exceptionreport('InvalidParameterValue', 'idtwo',
+            return self.exceptionreportahl('InvalidParameterValue', 'idtwo',
             'Invalid idtwo parameter')
         
         # when there is more than one value behind the idtwo paramter
         if len(self.parent.kvp['idtwo']) > 1:
-            return self.exceptionreport('InvalidParameterValue', 'idtwo',
+            return self.exceptionreportahl('InvalidParameterValue', 'idtwo',
             'Invalid idtwo parameter. May have only one value.')
 
         # no outputschema
@@ -675,7 +692,7 @@ class Csw2(object):
             self.parent.kvp['outputformat'] not in
             self.parent.context.model['operations']['GetSimilarRecords']['parameters']
             ['outputFormat']['values']):
-            return self.exceptionreport('InvalidParameterValue',
+            return self.exceptionreportahl('InvalidParameterValue',
             'outputformat', 'Invalid outputformat parameter %s' %
             self.parent.kvp['outputformat'])
     
@@ -2276,6 +2293,45 @@ class Csw2(object):
         ''' Generate ExceptionReport '''
         self.parent.exception = True
         self.parent.status = 'OK'
+
+        try:
+            language = self.parent.config.get('server', 'language')
+            ogc_schemas_base = self.parent.config.get('server', 'ogc_schemas_base')
+        except:
+            language = 'en-US'
+            ogc_schemas_base = self.parent.context.ogc_schemas_base
+
+        node = etree.Element(util.nspath_eval('ows:ExceptionReport',
+        self.parent.context.namespaces), nsmap=self.parent.context.namespaces,
+        version='1.2.0', language=language)
+
+        node.attrib[util.nspath_eval('xsi:schemaLocation',
+        self.parent.context.namespaces)] = \
+        '%s %s/ows/1.0.0/owsExceptionReport.xsd' % \
+        (self.parent.context.namespaces['ows'], ogc_schemas_base)
+
+        exception = etree.SubElement(node, util.nspath_eval('ows:Exception',
+        self.parent.context.namespaces),
+        exceptionCode=code, locator=locator)
+
+        exception_text = etree.SubElement(exception,
+        util.nspath_eval('ows:ExceptionText',
+        self.parent.context.namespaces))
+
+        try:
+            exception_text.text = text
+        except ValueError as err:
+            exception_text.text = repr(text)
+
+        return node
+    
+    # exceptionreport of A²HL² that changes also the number of the statuscode 
+    # most of the function based on the existing exception report
+    # @author: Anika Graupner  
+    def exceptionreportahl(self, code, locator, text):
+        ''' Generate ExceptionReport '''
+        self.parent.exception = True
+        self.parent.status = code # be taken over from the exceptionreport in csw3.py  
 
         try:
             language = self.parent.config.get('server', 'language')

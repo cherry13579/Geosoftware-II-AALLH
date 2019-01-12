@@ -602,15 +602,32 @@ class Csw3(object):
         # when a similar parameter is given in the request
         else:
 
+             # multiple similar parameter values will be seperated by commas 
+            if self.parent.requesttype == 'GET':
+                self.parent.kvp['similar'] = self.parent.kvp['similar'].split(',')
+
             # when there is no value behind the similar paramter, only "&similar="
             if len(self.parent.kvp['similar']) < 1:
                 return self.exceptionreport('InvalidParameterValue', 'similar',
-                'Invalid similar parameter')
+                'Invalid similar parameter. No value specified.')
             
             # when there are more than one value behind the similar paramter
             if len(self.parent.kvp['similar']) > 1:
                 return self.exceptionreport('InvalidParameterValue', 'similar',
                 'Invalid similar parameter. May only have one value.') 
+
+            # checks if the value of the similar parameter is an integer 
+            if not self.parent.kvp['similar'][0].isdigit():
+                return self.exceptionreport('InvalidParameterValue', 'similar',
+                'Invalid similar parameter. The value must be an integer.')
+
+            similarparamvalue = int(self.parent.kvp['similar'][0])
+
+            # when the value of the similar parameter value is not between 1 and 40 
+            # 40 is the maximum value we set
+            if similarparamvalue not in range(1,40):
+                return self.exceptionreport('InvalidParameterValue', 'similar',
+                'Invalid similar parameter. The value must be between 1 and 40.') 
 
             # get the value of the similar parameter from the request 
             requestSimilar = self.parent.kvp['similar'][0]
