@@ -7,12 +7,16 @@ CLI Tools/miniBeispiel\.py
 
 similaritycalculation/squere\.svg
 
-CLI Tools/__pycache__/
-
 CLI Tools/getAllMetadata\.py
 
 CLI Tools/output\.json
 
 \.DS_Store
 
+readme pycsw\.md
+
 *.code-workspace
+
+CLI Tools/\.vscode/
+
+CLI Tools/__pycache__/

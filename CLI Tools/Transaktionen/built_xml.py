@@ -1,7 +1,6 @@
 # xml for the update by record property transaction
 # @author: Anika Graupner 
 
-from lxml import etree
 import time
 import requests
 
