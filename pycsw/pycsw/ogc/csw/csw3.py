@@ -554,15 +554,15 @@ class Csw3(object):
                 # sql request to the similarities table 
                 # searching for the ids and the value of the similarity for the current id 
                 # the values are ordered in descending order
-                # we set the maximum value to 20 similar records (when no similar parameter is given in the request), but only records with a similarity value of at least 51 are displayed
-                c.execute('SELECT record1, total_similarity FROM similarities WHERE record2 = '+ requestID +' AND total_similarity >= 51 UNION SELECT record2, total_similarity FROM similarities WHERE record1 = '+ requestID +' AND total_similarity >= 50 ORDER BY total_similarity DESC LIMIT 20')
+                # we set the maximum value to 20 similar records (when no similar parameter is given in the request), but only records with a similarity value of at least 0.51 are displayed
+                c.execute('SELECT record1, total_similarity FROM similarities WHERE record2 = '+ requestID +' AND total_similarity >= 0.51 UNION SELECT record2, total_similarity FROM similarities WHERE record1 = '+ requestID +' AND total_similarity >= 0.51 ORDER BY total_similarity DESC LIMIT 20')
             
                 # get the result of the request 
                 values = c.fetchall()
 
                 print(values)
 
-                # response if there are no similar records for the given id (can happen if the values are always below 51)
+                # response if there are no similar records for the given id (can happen if the values are always below 0.51)
                 if not values:
                     resultForInputRecord = etree.SubElement(node, 'resultsForInputRecords')
                     resultForInputRecord.set('inputId', str(self.parent.kvp['id'][k]))
@@ -643,14 +643,14 @@ class Csw3(object):
                 # searching for the ids and the value of the similarity for the current id 
                 # the values are ordered in descending order
                 # the number of the records in the list of the respoinse depends on the similar parameter
-                c.execute('SELECT record1, total_similarity FROM similarities WHERE record2 = '+ str(requestID) +' AND total_similarity >= 51 UNION SELECT record2, total_similarity FROM similarities WHERE record1 = '+ str(requestID) +' AND total_similarity >= 50 ORDER BY total_similarity DESC LIMIT '+ requestSimilar +'')
+                c.execute('SELECT record1, total_similarity FROM similarities WHERE record2 = '+ str(requestID) +' AND total_similarity >= 0.51 UNION SELECT record2, total_similarity FROM similarities WHERE record1 = '+ str(requestID) +' AND total_similarity >= 0.51 ORDER BY total_similarity DESC LIMIT '+ requestSimilar +'')
             
                 # get the result of the request 
                 values = c.fetchall()
 
                 print(values)
 
-                # response if there are no similar records for the given id (can happen if the values are always below 51)
+                # response if there are no similar records for the given id (can happen if the values are always below 0.51)
                 if not values:
                     resultForInputRecord = etree.SubElement(node, 'resultsForInputRecords')
                     resultForInputRecord.set('inputId', str(self.parent.kvp['id'][k]))
@@ -765,21 +765,31 @@ class Csw3(object):
         
         # sql request to the similarities table 
         # searching for the value of the similarity of the boundingbox of the two input ids
-        c.execute('SELECT bbox FROM similarities WHERE record1 = '+ id1 +' and record2 = '+ id2 +'')
+        c.execute('SELECT geospatial_extent FROM similarities WHERE record1 = '+ id1 +' and record2 = '+ id2 +' or record1 = '+ id2 +' and record2 = '+ id1 +'')
     
         # get the request result 
         values = c.fetchall()
 
         print(values)
 
-        # get the value out of the list (0 because it can only be one value)
-        value = str(values[0][0])
-        print(value)
+        # if there is no similarity value of the two input ids of the bbox 
+        if not values:
 
-        # add the value of the bbox to the response 
-        etree.SubElement(node, 'inputid1').text = self.parent.kvp['idone'][0]
-        etree.SubElement(node, 'inputid2').text = self.parent.kvp['idtwo'][0]
-        etree.SubElement(node, 'similarityValueOfTheBBox').text = value
+            # add the value of the bbox to the response 
+            etree.SubElement(node, 'inputid1').text = self.parent.kvp['idone'][0]
+            etree.SubElement(node, 'inputid2').text = self.parent.kvp['idtwo'][0]
+            etree.SubElement(node, 'similarityValueOfTheBBox').text = 'No similarity value.'
+        
+        else:
+
+            # get the value out of the list (0 because it can only be one value)
+            value = str(values[0][0])
+            print(value)
+
+            # add the value of the bbox to the response 
+            etree.SubElement(node, 'inputid1').text = self.parent.kvp['idone'][0]
+            etree.SubElement(node, 'inputid2').text = self.parent.kvp['idtwo'][0]
+            etree.SubElement(node, 'similarityValueOfTheBBox').text = value
     
         return node
 

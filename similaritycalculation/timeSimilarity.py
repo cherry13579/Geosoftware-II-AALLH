@@ -10,7 +10,6 @@ sys.path.append(file_path)
 from DateTime import DateTime
 from datetime import date
 
-
 def timeLength(timeA, timeB):
     startA = DateTime(timeA[0])
     endA = DateTime(timeA[1])
