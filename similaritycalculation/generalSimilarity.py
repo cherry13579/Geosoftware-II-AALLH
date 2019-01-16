@@ -8,10 +8,10 @@ def sameDatatype(fileEnding1, fileEnding2):
     same2 = fileEnding2.find(fileEnding1.replace(".", "")) # 1 in 2
     print(same1, same2)
 
-    return 100 if same1>=0 or same2>=0 else 0
+    return 1 if same1>=0 or same2>=0 else 0
 
 def sameAuthor(author1, author2):
-    return 100 if author1 == author2 else 0
+    return 1 if author1 == author2 else 0
 
 def similarTitle(title1, title2):
     countList = 0
@@ -39,4 +39,4 @@ def similarTitle(title1, title2):
             percent = math.floor(percent*100)/100
         return percent
 
-print(sameDatatype(".tif",".geotif"))
+# print(sameDatatype(".tif",".geotif"))
