@@ -1,9 +1,23 @@
 mapboxgl.accessToken = 'pk.eyJ1IjoiY2hlcnJ5MTM1OSIsImEiOiJjam81bTRsbjIwOHZwM3ZvMWxoaXIzNzgxIn0.S75v2qYbBXUTvqIqXFQLfg';
 var map = new mapboxgl.Map({
     container: 'map',
-    style: 'mapbox://styles/mapbox/basic-v9',
+    style: 'mapbox://styles/mapbox/outdoors-v10',
     zoom: 4,
     center: [7.6261347, 51.9606649]
+});
+
+map.on('load', function () {
+    map.addSource('dem', {
+        "type": "raster-dem",
+        "url": "mapbox://mapbox.terrain-rgb"
+    });
+    map.addLayer({
+        "id": "hillshading",
+        "source": "dem",
+        "type": "hillshade"
+    // insert below waterway-river-canal-shadow;
+    // where hillshading sits in the Mapbox Outdoors style
+    }, 'waterway-river-canal-shadow');
 });
 
 map.addControl(new mapboxgl.GeolocateControl({
@@ -19,8 +33,21 @@ map.on('click', function (e) {
         // to the top-left corner of the map
         JSON.stringify(e.point) + '<br />' +
         // e.lngLat is the longitude, latitude geographical position of the event
-        JSON.stringify(e.lngLat);
+        JSON.stringify(map.getBounds());
 });
 
+$(document).ready(function () {
+    $("#bounds").click(function(){
+        $("#info").text(JSON.stringify(map.getBounds()));
+        sendToFlask(JSON.stringify(map.getBounds()));
+    });
+});
+
+
+function sendToFlask(bbox) {
+    $.post( "/getCoordinates", {
+        'boundingbox': bbox 
+    });
+}
 
 
