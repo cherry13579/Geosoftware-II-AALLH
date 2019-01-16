@@ -10,7 +10,7 @@ def sameDatatype(fileEnding1, fileEnding2):
 
     return 100 if same1>=0 or same2>=0 else 0
 
-def similarAuthor(author1, author2):
+def sameAuthor(author1, author2):
     return 100 if author1 == author2 else 0
 
 def similarTitle(title1, title2):

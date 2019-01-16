@@ -57,7 +57,7 @@ def similarArea(bboxA, bboxB):
             reachedPercentArea = areaB*100/areaA
         else:
             reachedPercentArea = areaA*100/areaB
-
+    reachedPercentArea = floor(reachedPercentArea*100)/100
     return reachedPercentArea
 
 
