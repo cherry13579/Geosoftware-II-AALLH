@@ -20,11 +20,11 @@ def timeLength(timeA, timeB):
     else:
         if lengthA > lengthB:
             lengthPercentage = lengthB/lengthA
-            lengthPercentage = floor(lengthPercentage/100)*100
+            lengthPercentage = floor(lengthPercentage*100)/100
             return lengthPercentage
         else:
             lengthPercentage = lengthA/lengthB
-            lengthPercentage = floor(lengthPercentage/100)*100
+            lengthPercentage = floor(lengthPercentage*100)/100
             return lengthPercentage
 
 def timeOverlap(timeA, timeB):
