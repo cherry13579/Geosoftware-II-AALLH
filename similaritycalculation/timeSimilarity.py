@@ -1,16 +1,6 @@
-import os
-import sys
-from math import *
-import time as timeMod
+from math import floor
 
-# add local modules folder
-file_path = os.path.join('..', 'Python_Modules')
-sys.path.append(file_path)
-
-from osgeo import gdal, ogr, osr
 from DateTime import DateTime
-from datetime import date
-
 
 def timeLength(timeA, timeB):
     startA = DateTime(timeA[0])
@@ -20,7 +10,7 @@ def timeLength(timeA, timeB):
     endB = DateTime(timeB[1])
 
     if startA > endA or startB > endB:
-        assert AttributeError("start value is higher than end value")
+        raise AttributeError("start value is higher than end value")
 
     lengthA = endA - startA
     lengthB = endB - startB
@@ -88,6 +78,6 @@ def similarInterval(timeA, timeB):
             intervalPercentage = floor(intervalPercentage*100)/100
             return intervalPercentage
 
-print(timeOverlap(['1935/01/01 00:00:00 GMT+0', '2014/01/01 00:00:00 GMT+0', 365.253164556962], ['2013/01/01 00:00:00 GMT+0', '2018/03/28 12:43:14.034000 GMT+0', 0]))
+# print(timeOverlap(['1935/01/01 00:00:00 GMT+0', '2014/01/01 00:00:00 GMT+0', 365.253164556962], ['2013/01/01 00:00:00 GMT+0', '2018/03/28 12:43:14.034000 GMT+0', 0]))
 
 # print(DateTime('1935/01/01 00:00:10 GMT+0') - DateTime('1935/01/01 00:00:00 GMT+0'))

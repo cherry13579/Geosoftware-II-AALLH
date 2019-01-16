@@ -46,7 +46,6 @@ from pycsw.core.formats.fmt_json import xml2dict
 from pycsw.ogc.fes import fes1
 import logging
 import urllib
-import sqlite3 # imported for connection on our own functions for the similarities functionalities 
 
 LOGGER = logging.getLogger(__name__)
 
@@ -58,12 +57,6 @@ class Csw2(object):
 
         self.parent = server_csw
         self.version = '2.0.2'
-
-    # Öffnen der Html page TAN
-    def extractmetadata(self):
-        print(os.getcwd())
-        f = codecs.open('/usr/lib/python3.5/site-packages/pycsw/page.html', 'r')
-        return f.read()
 
     def getcapabilities(self):
         ''' Handle GetCapabilities request '''
@@ -438,12 +431,14 @@ class Csw2(object):
     # @author: Anika Graupner
     def getsimilarrecords(self):
 
+        import sqlite3 # imported for connection on our own functions for the similarities functionalities
+
         print('getsimilarrecords is running in csw2')
 
         # first the connection is established to our database, to interact with the similarities table  
         # source: https://docs.python.org/3/library/sqlite3.html
         # @author: Aysel Tandik
-        conn = sqlite3.connect('../../db-data/data.db') # path to the database in the docker container 
+        conn = sqlite3.connect(os.path.join('..', '..', 'db-data', 'data.db')) # path to the database in the docker container 
         print(conn)
         c = conn.cursor()
  
@@ -464,7 +459,7 @@ class Csw2(object):
         # # wrong outputformat in the request  
         if ('outputformat' in self.parent.kvp and
             self.parent.kvp['outputformat'] not in
-            self.parent.context.model['operations']['GetRecordById']['parameters']
+            self.parent.context.model['operations']['GetSimilarRecords']['parameters']
             ['outputFormat']['values']):
             return self.exceptionreport('InvalidParameterValue',
             'outputformat', 'Invalid outputformat parameter %s' %
@@ -627,8 +622,9 @@ class Csw2(object):
         # 05.12.18, source: https://docs.python.org/3/library/sqlite3.html
         # author: Aysel Tandik
         # connection to database 
+        import sqlite3 # imported for connection on our own functions for the similarities functionalities 
         print('getsimilaritybbox is running in csw2')
-        conn = sqlite3.connect('../../db-data/data.db')
+        conn = sqlite3.connect(os.path.join('..', '..', 'db-data', 'data.db'))
         c = conn.cursor()
 
         print(c.fetchone())
@@ -677,7 +673,7 @@ class Csw2(object):
         # # wrong outputformat in the request  
         if ('outputformat' in self.parent.kvp and
             self.parent.kvp['outputformat'] not in
-            self.parent.context.model['operations']['GetRecordById']['parameters']
+            self.parent.context.model['operations']['GetSimilarRecords']['parameters']
             ['outputFormat']['values']):
             return self.exceptionreport('InvalidParameterValue',
             'outputformat', 'Invalid outputformat parameter %s' %
@@ -716,6 +712,8 @@ class Csw2(object):
         print(value)
 
         # add the value of the bbox to the response 
+        etree.SubElement(node, 'inputid1').text = self.parent.kvp['idone'][0]
+        etree.SubElement(node, 'inputid2').text = self.parent.kvp['idtwo'][0]
         etree.SubElement(node, 'similarityValueOfTheBBox').text = value
     
         return node
@@ -1302,6 +1300,9 @@ class Csw2(object):
         if 'outputschema' not in self.parent.kvp:
             self.parent.kvp['outputschema'] = self.parent.context.namespaces['csw']
 
+        if self.parent.requesttype == 'GET':
+            self.parent.kvp['id'] = self.parent.kvp['id'].split(',')
+
         if ('outputformat' in self.parent.kvp and
             self.parent.kvp['outputformat'] not in
             self.parent.context.model['operations']['GetRecordById']['parameters']
@@ -1522,7 +1523,7 @@ class Csw2(object):
         if (len(insertresults) > 0 and self.parent.kvp['verboseresponse']):
             # show insert result identifiers
             node.append(self._write_verboseresponse(insertresults))
-
+        
         return node
 
     def harvest(self):
