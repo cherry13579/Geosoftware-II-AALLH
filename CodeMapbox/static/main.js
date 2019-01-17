@@ -38,6 +38,7 @@ map.on('click', function (e) {
 
 $(document).ready(function () {
     $("#bounds").click(function () {
+        $("#resultDiv").hide();
         $("#info").text(JSON.stringify(map.getBounds()));
         sendToFlask(JSON.stringify(map.getBounds()));
     });
@@ -53,14 +54,22 @@ $(document).ready(function () {
 function sendToFlask(bbox) {
     $.ajax({
         type: 'POST',
-        data: {'boundingbox':bbox},
-        // contentType: 'application/json;charset=UTF-8',
+        data: {
+            'boundingbox': bbox
+        },
         url: "/getCoordinates",
         success: function (data) {
-            console.log(data)
+            table = JSON.parse(data).table
+            console.log(table)
+            $("#resultTable").html(table);
+            $("#resultDiv").show();
+
+            $([document.documentElement, document.body]).animate({
+                scrollTop: $("#resultTable").offset().top
+            }, 1000);
         },
         error: function (xhr) {
-            console.log("fail")
+            console.log(xhr)
         }
     });
 }
