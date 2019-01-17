@@ -15,8 +15,8 @@ map.on('load', function () {
         "id": "hillshading",
         "source": "dem",
         "type": "hillshade"
-    // insert below waterway-river-canal-shadow;
-    // where hillshading sits in the Mapbox Outdoors style
+        // insert below waterway-river-canal-shadow;
+        // where hillshading sits in the Mapbox Outdoors style
     }, 'waterway-river-canal-shadow');
 });
 
@@ -37,17 +37,30 @@ map.on('click', function (e) {
 });
 
 $(document).ready(function () {
-    $("#bounds").click(function(){
+    $("#bounds").click(function () {
         $("#info").text(JSON.stringify(map.getBounds()));
         sendToFlask(JSON.stringify(map.getBounds()));
     });
 });
 
 
+// function sendToFlask(bbox) {
+//     $.post( "/getCoordinates", {
+//         'boundingbox': bbox 
+//     });
+// }
+
 function sendToFlask(bbox) {
-    $.post( "/getCoordinates", {
-        'boundingbox': bbox 
+    $.ajax({
+        type: 'POST',
+        data: {'boundingbox':bbox},
+        // contentType: 'application/json;charset=UTF-8',
+        url: "/getCoordinates",
+        success: function (data) {
+            console.log(data)
+        },
+        error: function (xhr) {
+            console.log("fail")
+        }
     });
 }
-
-

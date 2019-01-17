@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block content %}
+    <a href="{{ url_for('webMap') }}" class="btn btn-default">Go to Google</a>
+    <h1>Find your similar record!</h1>
+    <h3>Please locate yourselve or click on the map where you want to find records!</h3>
+
+    <div>
+        <table class="table">
+            <tr>
+                <th>ID</th>
+                <th>boundingbox</th>
+            </tr>
+            {% for records in data[0] %}
+               <tr>
+                  <td> {{ records[0] }} </td>
+                  <td> {{ records[1] }} </td>
+               </tr>
+            {% endfor %}
+         </table>
+    </div>
+{% endblock %}
