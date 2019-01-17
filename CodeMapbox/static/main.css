@@ -1,0 +1,72 @@
+body,
+html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: rgb(2, 27, 44);
+}
+
+body {
+    background-image: url("{{ url_for('static', filename='Projekt.png') }}");
+    background-repeat: no-repeat;
+    background-position: right;
+    background-size: 8%;
+    background-position-x: 95%;
+    background-position-y: 0%;
+}
+
+#map {
+    height: 650px;
+    margin: 10px;
+    border-radius: 5px;
+}
+
+.controls {
+    position: absolute;
+    top: 2em;
+    left: 10%;
+    width: 90%;
+    z-index: 2;
+}
+
+
+#info {
+    display: block;
+    position: relative;
+    margin: 0px auto;
+    width: 50%;
+    padding: 10px;
+    border: none;
+    border-radius: 3px;
+    font-size: 12px;
+    text-align: center;
+    color: black;
+    background: #fff;
+}
+
+table {
+    border-color: blue;
+    border-radius: 5px;
+    width: 90%;
+    margin: auto;
+    color: white;
+    padding: 10px;
+}
+
+th,td {
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #333399;
+}
+
+/* #resultDiv {
+    margin: auto
+} */
+
+h1,h2,h3 {
+    text-align: center;
+    color: antiquewhite;
+}

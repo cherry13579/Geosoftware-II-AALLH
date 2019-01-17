@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1>Find your records on the map!</h1>
+    <h3>Please locate yourselve or click on the map where you want to find records!</h3>
+
+    <h2 id="info">Start</h2>
+    <button id="bounds" class="button" >Get Geodata in viewport</button>
+    <div id="map"></div>
+    <div id="resultDiv" style="display:none; overflow-x:auto; overflow-y:auto">
+        <table id="resultTable"></table>
+    </div>
+{% endblock %}
+ 
