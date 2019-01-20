@@ -7,6 +7,7 @@ from osgeo import ogr
 app = Flask(__name__)
 app.secret_key = 'any random string'
 
+
 @app.route("/")
 @app.route("/map")
 def webMap():
@@ -19,7 +20,6 @@ def get_javascript_data(jsdata):
     return jsdata
 
 
-
 @app.route("/getCoordinates", methods=['POST'])
 def getCoordinates():
     jsdata = request.form['boundingbox']
@@ -28,12 +28,14 @@ def getCoordinates():
     allData = getAllDataFromPycsw()
     dataInViewport = []
     for bbox in allData:
-        if boundsIntersect(wktData, bbox['bbox']):
+        if bound1InBound2(wktData, bbox['bbox']):
             dataInViewport.append(bbox)
 
+    if not dataInViewport:
+        return json.dumps({'status': 'OK', 'table': "<tr><th>No data available for this region!</th></tr>"})
     table = createTable(dataInViewport)
     # print(dataInViewport)
-    return json.dumps({'status': 'OK', 'table': table}) 
+    return json.dumps({'status': 'OK', 'table': table})
     # return "hallo"
 
 
@@ -47,15 +49,17 @@ def getAllDataFromPycsw():
     row = c.fetchall()
 
     # print(row)
-    row = list(map(lambda a : {"id": a[0], "bbox": a[1]}, row))
+    row = list(map(lambda a: {"id": a[0], "bbox": a[1]}, row))
     return row
 
 
-def boundsIntersect(wktBbox1, wktBbox2):
+def bound1InBound2(wktBbox1, wktBbox2):
     geom1 = ogr.CreateGeometryFromWkt(wktBbox1)
     geom2 = ogr.CreateGeometryFromWkt(wktBbox2)
 
-    return False if (geom1.Intersection(geom2)).ExportToWkt() == "GEOMETRYCOLLECTION EMPTY" else True
+    print(geom1.Contains(geom2))
+
+    return geom1.Contains(geom2)
 
 
 def jsdata2wktgeo(bbox):
@@ -66,7 +70,7 @@ def jsdata2wktgeo(bbox):
     return spatialExtent
 
 
-def createTable(values): # first value in list is the 
+def createTable(values):
     tableMain = """
     <tr>
         %(heading)s
@@ -78,22 +82,17 @@ def createTable(values): # first value in list is the
     headings = ""
     for key in keys:
         headings += "<th>%s</th>" % key
-    # print(headings)
 
     content = ""
     for dataset in values:
         content += "<tr>\n"
         for key in keys:
-            content += "    <td>%s</td>\n" % dataset[key] 
+            content += "    <td>%s</td>\n" % dataset[key]
         content += "</tr>\n"
 
-    # print(content)
+    table = tableMain % {"heading": headings, "content": content}
 
-    table = tableMain % {"heading":headings, "content":content}
-    print(table)
-        
     return table
-
 
 
 if __name__ == "__main__":

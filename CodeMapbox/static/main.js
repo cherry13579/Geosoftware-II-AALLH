@@ -3,8 +3,11 @@ var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/outdoors-v10',
     zoom: 4,
-    center: [7.6261347, 51.9606649]
+    center: [7.6261347, 51.9606649],
+    attributionControl: false
 });
+map.addControl(new mapboxgl.AttributionControl(), 'top-right');
+
 
 map.on('load', function () {
     map.addSource('dem', {
@@ -44,13 +47,6 @@ $(document).ready(function () {
     });
 });
 
-
-// function sendToFlask(bbox) {
-//     $.post( "/getCoordinates", {
-//         'boundingbox': bbox 
-//     });
-// }
-
 function sendToFlask(bbox) {
     $.ajax({
         type: 'POST',
@@ -60,7 +56,7 @@ function sendToFlask(bbox) {
         url: "/getCoordinates",
         success: function (data) {
             table = JSON.parse(data).table
-            console.log(table)
+            // console.log(table)
             $("#resultTable").html(table);
             $("#resultDiv").show();
 
@@ -73,3 +69,27 @@ function sendToFlask(bbox) {
         }
     });
 }
+
+$( document ).ajaxStart(function() {
+    $( "#overlay" ).show();
+});
+
+$( document ).ajaxStop(function() {
+    $( "#overlay" ).hide();
+});
+
+$(document).ready(function () {
+    $("#toBottom").click(function () {
+        $([document.documentElement, document.body]).animate({
+            scrollTop: $("#resultTable").offset().top
+        }, 1000);
+    });
+});
+
+$(document).ready(function () {
+    $("#toTop").click(function () {
+        $([document.documentElement, document.body]).animate({
+            scrollTop: $("#bounds").offset().top
+        }, 1000);
+    });
+});
