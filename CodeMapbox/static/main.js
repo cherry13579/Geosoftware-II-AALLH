@@ -6,7 +6,11 @@ var map = new mapboxgl.Map({
     center: [7.6261347, 51.9606649],
     attributionControl: false
 });
-map.addControl(new mapboxgl.AttributionControl(), 'top-right');
+map.addControl(new mapboxgl.AttributionControl(), 'top-left');
+
+map.addControl(new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken
+}));
 
 
 map.on('load', function () {
@@ -18,8 +22,6 @@ map.on('load', function () {
         "id": "hillshading",
         "source": "dem",
         "type": "hillshade"
-        // insert below waterway-river-canal-shadow;
-        // where hillshading sits in the Mapbox Outdoors style
     }, 'waterway-river-canal-shadow');
 });
 
