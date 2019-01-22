@@ -14,118 +14,154 @@ LOGGER = logging.getLogger(__name__)
 
 def similaritycalculation(id1, bbox, timebegin1, timeend1, format1): 
 
-    LOGGER.info('Similaritycalculation started.')
+    #LOGGER.info('Similaritycalculation started.')
 
     # connection to the database 
     conn = sqlite3.connect(os.path.join('..', '..', 'db-data', 'data.db')) 
     LOGGER.debug(conn)
     c = conn.cursor()
 
-    # formatting the input for the functions of the timeSimilarity
-    timeA = [timebegin1, timeend1]
-
-    # formatting the input for the functions of the spatialSimilarity
-    a = bbox.replace("POLYGON", "")
-    b = a.replace("((", "").replace("))", "").replace(",", " ")
-    bbox1 = b.split()
-
-    minx1 = bbox1[0]
-    miny1 = bbox1[1]
-    maxx1 = bbox1[4]
-    maxy1 = bbox1[5]
-
-    bboxA = [minx1, miny1, maxx1, maxy1]
-    bboxA = list(map(float, bboxA))
-
-    # get the title and the author of the updated record from the database 
-    c.execute("SELECT title, creator FROM records WHERE identifier = '"+ id1 +"'")
-    LOGGER.info('Getting title and creator from the updated record from the records table!')
-
+    #
+    c.execute("SELECT identifier FROM records")
     values = c.fetchall()
+    if values:
 
-    title1 = values[0][0]
-    creator1 = values[0][1]
+        # formatting the input for the functions of the timeSimilarity
+        timeA = [timebegin1, timeend1]
+        
+        # formatting the input for the functions of the spatialSimilarity
+        a = bbox.replace("POLYGON", "")
+        b = a.replace("((", "").replace("))", "").replace(",", " ")
+        bbox1 = b.split()
 
-    # delete all records in the similarities table where record1 or record2 is like the input id 
-    c.execute("DELETE FROM similarities WHERE record1 = '"+ id1 +"' OR record2 = '"+ id1 +"'")
-    LOGGER.info('Deleting records from similarities tables!')
+        minx1 = bbox1[0]
+        miny1 = bbox1[1]
+        maxx1 = bbox1[4]
+        maxy1 = bbox1[5]
 
-    # select all important values from the database for similarity calculation except the values of the updated record 
-    c.execute("SELECT identifier, title, time_begin, time_end, creator, wkt_geometry, format FROM records")
-    values = c.fetchall()
+        bboxA = [minx1, miny1, maxx1, maxy1]
+        bboxA = list(map(float, bboxA))
 
-    rows = []
+        bboxA = [124.99553571, 67.99553636, 165.00445788, 72.00446429]
 
-    # for each record in the database
-    i = 0
-    while i < len(values):
+        # get the title and the author of the updated record from the database 
+        c.execute("SELECT title, creator FROM records WHERE identifier = %r" % (id1))
+        LOGGER.info('Getting title and creator from the updated record from the records table!')
 
-        # the record should not be compared to itself
-        if values[i][0] is id1:
+        values = c.fetchall()
 
-            i+=1
+        title1 = values[0][0]
+        creator1 = values[0][1]
 
-        # no similarity calculation with records which have no time extend or no spatial extend 
-        if values[i][2] and values[i][5] is None:
+        # delete all records in the similarities table where record1 or record2 is like the input id 
+        c.execute("DELETE FROM similarities WHERE record1 = %(id1)r OR record2 = %(id1)r" % ({'id1' : id1}))
+        conn.commit()
+        LOGGER.info('Deleting records from similarities tables!')
 
-            i+=1
 
-        # start comparing the updated record with all valid records in the database
-        else:
+        # select all important values from the database for similarity calculation except the values of the updated record 
+        c.execute("SELECT identifier, title, time_begin, time_end, creator, wkt_geometry, format FROM records WHERE NOT identifier = %r" % (id1))
+        values = c.fetchall()
+        print(len(values))
 
-            # formatting the variables of the respective record
-            id2 = values[i][0]
-            title2 = values[i][1]
-            timebegin2 = values[i][2]
-            timeend2 = values[i][3]
-            timeB = [timebegin2, timeend2]
-            creator2 = values[i][4]
-            box = values[i][5]
-            c = box.replace("POLYGON", "")
-            d = c.replace("((", "").replace("))", "").replace(",", " ")
-            bbox2 = d.split()
-            minx2 = bbox2[0]
-            miny2 = bbox2[1]
-            maxx2 = bbox2[4]
-            maxy2 = bbox2[5]
-            bboxB = [minx2, miny2, maxx2, maxy2]
-            bboxB = list(map(float, bboxB))
-            format2 = values[i][6]
 
-            
-            # general similarity (same dataformat, same author, similar title)
-            sameDatatype = gs.sameDatatype(format1, format2) 
-            similarAuthor = gs.similarAuthor(creator1, creator2) 
-            similarTitle = gs.similarTitle(title1, title2) 
+        rows = []
 
-            generalSimilarity = sameDatatype + similarAuthor + similarTitle 
+        # for each record in the database
+        i = 0
+        while i < len(values):
 
-            # spatial simialrity (overlapping bboxes, similar area of the bboxes, spatial distance)
-            spatialOverlap = sps.spatialOverlap(bboxA, bboxB) 
-            similarArea = sps.similarArea(bboxA, bboxB) 
-            spatialDistance = sps.spatialDistance(bboxA, bboxB) 
+            # the record should not be compared to itself
+            if values[i][0] is id1:
 
-            spatialSimilarity = spatialOverlap + similarArea + spatialDistance 
+                i+=1
 
-            # temporal similarity (time length, overlapping of the time periods)
-            timeLength = ts.timeLength(timeA, timeB) 
-            timeOverlap = ts.timeOverlap(timeA, timeB) 
+            # no similarity calculation with records which have no time extend or no spatial extend 
+            if values[i][2] and values[i][5] is None:
 
-            timeSimilarity = timeLength + timeOverlap 
+                i+=1
 
-            # add everything together for the total similarity value
-            totalSimilarity = generalSimilarity + spatialSimilarity + timeSimilarity
+            # start comparing the updated record with all valid records in the database
+            else:
 
-            # new tupel add to rows list (later inserted in the database table similarities)
-            newrow = (str(id1), str(id2), totalSimilarity, spatialSimilarity, timeSimilarity, generalSimilarity)
-            rows.append(newrow)
+                # formatting the variables of the respective record
+                id2 = values[i][0]
+                title2 = values[i][1]
+                timebegin2 = values[i][2]
+                timeend2 = values[i][3]
+                timeB = [timebegin2, timeend2]
+                creator2 = values[i][4]
+                box = values[i][5]
+                e = box.replace("POLYGON", "")
+                d = e.replace("((", "").replace("))", "").replace(",", " ")
+                bbox2 = d.split()
+                minx2 = bbox2[0]
+                miny2 = bbox2[1]
+                maxx2 = bbox2[4]
+                maxy2 = bbox2[5]
+                bboxB = [minx2, miny2, maxx2, maxy2]
+                bboxB = list(map(float, bboxB))
+                bboxB = [124.99553571, 67.99553636, 165.00445788, 72.00446429]
+                format2 = values[i][6]
 
-    print(rows)
+                
+                # general similarity (same dataformat, same author, similar title)
+                sameDatatype = gs.sameDatatype(format1, format2) 
+                similarAuthor = gs.similarAuthor(creator1, creator2) 
+                similarTitle = gs.similarTitle(title1, title2) 
 
-    # insert the calculated values into the database 
-    c.execute('insert into similarities values (record1, record2, total_similarity, geospatial_extent, temporal_extent, general_extent)', rows)
+                generalSimilarity = sameDatatype + similarAuthor + similarTitle 
+                #LOGGER.info('General similarity for format1 '+ format1 +' and format2 '+ format2 +': '+ generalSimilarity + '.')
 
-    LOGGER.info('Similarity calculation finished.')
+                # spatial simialrity (overlapping bboxes, similar area of the bboxes, spatial distance)
+                spatialOverlap = sps.spatialOverlap(bboxA, bboxB) 
+                similarArea = sps.similarArea(bboxA, bboxB) 
+                spatialDistance = sps.spatialDistance(bboxA, bboxB) 
+
+                spatialSimilarity = spatialOverlap + similarArea + spatialDistance 
+                #LOGGER.info('Spatail similarity for bboxA '+ bboxA +' and bboxB '+ bboxB +': '+ spatialSimilarity + '.')
+
+                # temporal similarity (time length, overlapping of the time periods)
+                timeLength = ts.timeLength(timeA, timeB) 
+                timeOverlap = ts.timeOverlap(timeA, timeB) 
+
+                timeSimilarity = timeLength + timeOverlap 
+                #LOGGER.info('Time similarity for timeA '+ timeA +' and timeB '+ timeB +': '+ timeSimilarity + '.')
+
+                # add everything together for the total similarity value
+                totalSimilarity = generalSimilarity + spatialSimilarity + timeSimilarity
+                #LOGGER.info('Total similarity for dataset '+ id1 +' and dataset '+ id2 +': '+ timeSimilarity + '.')
+
+                #  c.execute("""insert into similarities (record1, record2, total_similarity, geospatial_extent, temporal_extent, general_extent) 
+                #  values (%(id1)r, %(id2)r, %(totalSimilarity)r, %(spatialSimilarity)r, %(timeSimilarity)r, %(generalSimilarity)r""" %({'id1' : id1, 'id2' : id2, 'totalSimilarity' : totalSimilarity, spatialSimilarity, timeSimilarity, generalSimilarity}))
+
+                # new tupel add to rows list (later inserted in the database table similarities)
+                newrow = (id1, id2, totalSimilarity, spatialSimilarity, timeSimilarity, generalSimilarity)
+                rows.append(newrow)
+
+                i+=1
+
+        # print(rows)
+
+        # insert the calculated values into the database 
+        for entry in rows:
+            # values = ""
+            # for value in entry:
+            #     values += str(value) + ","
+
+            sql = """insert into similarities (record1, record2, total_similarity, geospatial_extent, temporal_extent, general_extent) 
+                    values (?,?,?,?,?,?)"""
+            print(sql)
+            c.execute(sql, entry)
+            conn.commit()
+
+        c.execute("SELECT * FROM similarities")
+        print(c.fetchall())
+
+    #     #LOGGER.info('Similarity calculation finished.')
+    
+    # # else:
+    # #     LOGGER.info('Nothing to compare.')
 
 
 

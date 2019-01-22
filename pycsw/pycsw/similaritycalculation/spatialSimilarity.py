@@ -1,14 +1,39 @@
 from math import *
 from osgeo import gdal, ogr, osr
-# from subprocess import Popen, PIPE
+import logging 
+
+#LOGGER = logging.get#LOGGER(__name__)
+
+#LOGGER.info('Spatial similarity is calculated.')
 
 def spatialOverlap(bboxA, bboxB):
+
+    return 0.1
+
+    wkt1 = "POLYGON ((1208064.271243039 624154.6783778917, 1208064.271243039 601260.9785661874, 1231345.9998651114 601260.9785661874, 1231345.9998651114 624154.6783778917, 1208064.271243039 624154.6783778917))"
+    wkt2 = "POLYGON ((1199915.6662253144 633079.3410163528, 1199915.6662253144 614453.958118695, 1219317.1067437078 614453.958118695, 1219317.1067437078 633079.3410163528, 1199915.6662253144 633079.3410163528)))"
+
+    poly1 = ogr.CreateGeometryFromWkt(wkt1)
+    poly2 = ogr.CreateGeometryFromWkt(wkt2)
+
+    print(poly1, poly2)
+    union = poly1.Union(poly2)
+    intersection = poly1.Intersection(poly2)
+    print(union, intersection)
+    print ("WICHTIG "+ union.ExportToWkt())
+
+
+
+
+    print(bboxA, bboxB)
     # get Boundingboxes as Geometries
     boxA = _generateGeometryFromBbox(bboxA)
     boxB = _generateGeometryFromBbox(bboxB)
 
     areaA = boxA.GetArea()
     areaB = boxB.GetArea()
+
+    print(areaA, areaB)
 
     if (areaA == 0) and (areaB == 0):
         bufferDist = 328 # foot = 500 Meter
@@ -21,8 +46,10 @@ def spatialOverlap(bboxA, bboxB):
     # print(areaA)
 
     largerArea = areaA if areaA >= areaB else areaB
-
+    
+    print(boxA, boxB)
     intersection = boxA.Intersection(boxB)
+    print(intersection)
     intersectGeometry = ogr.CreateGeometryFromWkt(intersection.ExportToWkt())
 
     intersectArea = intersectGeometry.GetArea()
@@ -33,10 +60,12 @@ def spatialOverlap(bboxA, bboxB):
 
     reachedPercentArea = floor(reachedPercentArea * 100)/100
     # print(reachedPercentArea)
+    ##LOGGER.info('Result spatial Overlap: '+ reachedPercentArea +'.')
     return reachedPercentArea
 
 
 def similarArea(bboxA, bboxB):
+
     boxA = _generateGeometryFromBbox(bboxA)
     boxB = _generateGeometryFromBbox(bboxB)
 
@@ -49,14 +78,18 @@ def similarArea(bboxA, bboxB):
         reachedPercentArea = 100
     else:
         if areaA >= areaB:
-            reachedPercentArea = areaB*100/areaA
+            reachedPercentArea = areaB/areaA
         else:
-            reachedPercentArea = areaA*100/areaB
+            reachedPercentArea = areaA/areaB
 
+    #LOGGER.info('Result similar Area: '+ reachedPercentArea +'.')
     return reachedPercentArea
 
 
 def spatialDistance(bboxA, bboxB):
+
+    return 0.1
+
     distBetweenCenterPoints = None
     longerDistance = None
     if (bboxA[0] == bboxA[2]) and (bboxB[0] == bboxB[2]) and (bboxA[1] == bboxA[3]) and (bboxB[1] == bboxB[3]):
@@ -94,9 +127,10 @@ def spatialDistance(bboxA, bboxB):
         distPercentage = (1 - (distBetweenCenterPoints/longerDistance)) * 100
         distPercentage = floor(distPercentage * 100)/100
         # print(distPercentage if distPercentage>0 else 0)
+        #LOGGER.info('Result spatial distance: '+ distPercentage +'.')
         return distPercentage if distPercentage>0 else 0
     else:
-        print("Error while processing")
+        #LOGGER.error('Error while processing.')
         return 0
 
 
@@ -131,6 +165,8 @@ def spatialDistance(bboxA, bboxB):
 
 
 def _generateGeometryFromBbox(bbox):
+    # print(bbox)
+
     source = osr.SpatialReference()
     source.ImportFromEPSG(4326)
     target = osr.SpatialReference()
@@ -161,7 +197,7 @@ def _generateGeometryFromBbox(bbox):
 
     
     transform = osr.CoordinateTransformation(source, target)
-    boxA.Transform(transform)
+    # boxA.Transform(transform)
 
     return boxA
 
@@ -182,14 +218,15 @@ def _getDistance(startingpoint, endpoint):
     return d
 
 def _getMidPoint(bbox):
+    print(bbox)
     line1 = "LINESTRING (%f %f, %f %f)" % (bbox[0], bbox[1], bbox[2], bbox[3])
     line2 = "LINESTRING (%f %f, %f %f)" % (bbox[2], bbox[1], bbox[0], bbox[3])
-
+    print(line1, line2)
     line1 = ogr.CreateGeometryFromWkt(line1)
     line2 = ogr.CreateGeometryFromWkt(line2)
 
     intersectionPoint = line1.Intersection(line2)
-    z = intersectionPoint.ExportToWkt()
+    # z = intersectionPoint.ExportToWkt()
     intersectGeometry = ogr.CreateGeometryFromWkt(intersectionPoint.ExportToWkt())
 
     datatype = intersectGeometry.GetGeometryName()
@@ -217,11 +254,12 @@ def _getMidPoint(bbox):
 
 ###############################################################################       
 
+# 124.99553571 67.99553636, 124.99553571 72.00446429, 165.00445788 72.00446429, 165.00445788 67.99553636, 124.99553571 67.99553636
 
-# # Geometry
+# Geometry
 # print("\n Geometry \n")
 # bbox1 = [13.0078125, 50.62507306341435, 5.44921875, 45.82879925192134]
-# bbox2 = [17.7978515625, 52.09300763963822, 7.27294921875, 46.14939437647686]
+# bbox2 = [124.99553571, 67.99553636, 165.00445788, 72.00446429]
 # print(spatialDistance(bbox1, bbox2))
 # print(spatialOverlap(bbox1, bbox2))
 # print(similarArea(bbox1, bbox2))

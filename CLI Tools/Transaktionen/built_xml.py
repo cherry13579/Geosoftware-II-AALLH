@@ -49,7 +49,7 @@ boundingbox = 'POLYGON((-180.00 -90.00, -180.00 90.00, 180.00 90.00, 180.00 -90.
 datebegin = '2019-01-04'
 dateend = '2019-01-08'
 fileformat = 'testformat'
-identifier = 'ag3' #wird in die Kommandozeile mit eingegeben 
+identifier = 'xyz' #wird in die Kommandozeile mit eingegeben 
 data = {'actual_date':date , 'bbox':boundingbox, 'date_begin':datebegin, 'date_end':dateend, 'file_format':fileformat, 'id':identifier}
 xml = updatexml%data
 print(xml)

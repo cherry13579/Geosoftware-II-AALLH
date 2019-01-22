@@ -1,4 +1,7 @@
 import math
+import logging 
+
+#LOGGER = logging.get#LOGGER(__name__)
 
 
 def sameDatatype(fileEnding1, fileEnding2):
@@ -8,9 +11,12 @@ def sameDatatype(fileEnding1, fileEnding2):
     same2 = fileEnding2.find(fileEnding1.replace(".", "")) # 1 in 2
     print(same1, same2)
 
+    #LOGGER.info('Same Datatype: '+ fileEnding1 +','+ fileEnding2 +'.')
+    #LOGGER.info(fileEnding1, fileEnding2)
     return 100 if same1>=0 or same2>=0 else 0
 
 def similarAuthor(author1, author2):
+    #LOGGER.info('Similar Author: '+ author1 +','+ author2 +'.')
     return 100 if author1 == author2 else 0
 
 def similarTitle(title1, title2):
@@ -26,6 +32,7 @@ def similarTitle(title1, title2):
         if len(title1) != 0:
             percent = countList*100/len(title1)
             percent = math.floor(percent*100)/100
+        #LOGGER.info('Result similar title:'+ percent +'.')
         return percent
     else:
         charList = []
@@ -37,6 +44,6 @@ def similarTitle(title1, title2):
         if len(title2) != 0:
             percent = countList*100/len(title2)
             percent = math.floor(percent*100)/100
+        #LOGGER.info('Result similar title:'+ percent +'.')
         return percent
 
-print(sameDatatype(".tif",".geotif"))

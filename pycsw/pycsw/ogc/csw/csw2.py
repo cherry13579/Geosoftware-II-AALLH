@@ -444,11 +444,13 @@ class Csw2(object):
  
         # missing id paramter in the request, so there is no "&id="
         if 'id' not in self.parent.kvp:
+            LOGGER.exception('Missing id parameter.')
             return self.exceptionreportahl('MissingParameterValue', 'id',
             'Missing id parameter')
 
         # when there is no value behind the id paramter, only "&id="
         if len(self.parent.kvp['id']) < 1:
+            LOGGER.exception('Invalid id parameter. No id available.')
             return self.exceptionreportahl('InvalidParameterValue', 'id',
             'Invalid id parameter. No id available.')
 
@@ -461,6 +463,8 @@ class Csw2(object):
             self.parent.kvp['outputformat'] not in
             self.parent.context.model['operations']['GetSimilarRecords']['parameters']
             ['outputFormat']['values']):
+            LOGGER.exception('Invalid outputformat parameter %s' %
+            self.parent.kvp['outputformat'])
             return self.exceptionreportahl('InvalidParameterValue',
             'outputformat', 'Invalid outputformat parameter %s' %
             self.parent.kvp['outputformat'])
@@ -469,11 +473,12 @@ class Csw2(object):
         j = 0
         while j < len(self.parent.kvp['id']):
             requestID = self.parent.kvp['id'][j]
-            c.execute("SELECT identifier FROM records WHERE identifier = '"+ requestID +"'")
+            c.execute("SELECT identifier FROM records WHERE identifier = %r" % (requestID))
             values = c.fetchall()
             if not values:
+                LOGGER.exception('The id %r does not exist in the database.' % (requestID))
                 return self.exceptionreportahl('InvalidParameterValue', 'id',
-                'The id '+ requestID +' does not exist in the database.')
+                'The id %r does not exist in the database.' % (requestID))
             else:
                 j+=1
         
@@ -494,13 +499,23 @@ class Csw2(object):
 
                 # variable for the current id 
                 requestID = self.parent.kvp['id'][k]
-                LOGGER.debug('Input id for request: %s', requestID)
+                LOGGER.debug('Input id for request: %r', requestID)
+                print(requestID)
 
                 # sql request to the similarities table 
                 # searching for the ids and the value of the similarity for the current id 
                 # the values are ordered in descending order
                 # we set the maximum value to 20 similar records (when no similar parameter is given in the request), but only records with a similarity value of at least 0.51 are displayed
-                c.execute("SELECT record1, total_similarity FROM similarities WHERE record2 = '"+ requestID +"' AND total_similarity >= 0.51 UNION SELECT record2, total_similarity FROM similarities WHERE record1 = '"+ requestID +"' AND total_similarity >= 0.51 ORDER BY total_similarity DESC LIMIT 20")
+                c.execute("""SELECT record1, total_similarity 
+                            FROM similarities 
+                            WHERE record2 = %(requestID)r 
+                                AND total_similarity >= 0.51 
+                            UNION 
+                                SELECT record2, total_similarity 
+                                FROM similarities 
+                                WHERE record1 = %(requestID)r 
+                                    AND total_similarity >= 0.51 
+                            ORDER BY total_similarity DESC LIMIT 20""" % ({'requestID' : requestID}))
             
                 # get the result of the request 
                 values = c.fetchall()
@@ -549,16 +564,19 @@ class Csw2(object):
 
             # when there is no value behind the similar paramter, only "&similar="
             if len(self.parent.kvp['similar']) < 1:
+                LOGGER.exception('Invalid similar parameter. No value specified.')
                 return self.exceptionreportahl('InvalidParameterValue', 'similar',
                 'Invalid similar parameter. No value specified.')
             
             # when there are more than one value behind the similar paramter
             if len(self.parent.kvp['similar']) > 1:
+                LOGGER.exception('Invalid similar parameter. May only have one value.')
                 return self.exceptionreportahl('InvalidParameterValue', 'similar',
                 'Invalid similar parameter. May only have one value.') 
 
             # checks if the value of the similar parameter is an integer 
             if not self.parent.kvp['similar'][0].isdigit():
+                LOGGER.exception('Invalid similar parameter. The value must be an integer.')
                 return self.exceptionreportahl('InvalidParameterValue', 'similar',
                 'Invalid similar parameter. The value must be an integer.')
 
@@ -567,12 +585,13 @@ class Csw2(object):
             # when the value of the similar parameter value is not between 1 and 50 
             # 50 is the maximum value we set
             if similarparamvalue not in range(1,51):
+                LOGGER.exception('Invalid similar parameter. The value must be between 1 and 50.')
                 return self.exceptionreportahl('InvalidParameterValue', 'similar',
                 'Invalid similar parameter. The value must be between 1 and 50.') 
 
             # get the value of the similar parameter from the request 
             requestSimilar = self.parent.kvp['similar'][0]
-            LOGGER.debug('Value of the similar parameter: %s', requestSimilar)
+            LOGGER.debug('Value of the similar parameter: %r', requestSimilar)
 
             # for every id value of the id parameter 
             k = 0
@@ -580,13 +599,22 @@ class Csw2(object):
 
                 # variable for the current id 
                 requestID = self.parent.kvp['id'][k]
-                LOGGER.debug('Input id for request: %s', requestID)
+                LOGGER.debug('Input id for request: %r', requestID)
 
                 # sql request to the similarities table 
                 # searching for the ids and the value of the similarity for the current id 
                 # the values are ordered in descending order
                 # the number of the records in the list of the respoinse depends on the similar parameter
-                c.execute("SELECT record1, total_similarity FROM similarities WHERE record2 = '"+ requestID +"' AND total_similarity >= 0.51 UNION SELECT record2, total_similarity FROM similarities WHERE record1 = '"+ requestID +"' AND total_similarity >= 0.51 ORDER BY total_similarity DESC LIMIT '"+ requestSimilar +"'")
+                c.execute("""SELECT record1, total_similarity 
+                             FROM similarities 
+                             WHERE record2 = %(requestID)r 
+                                AND total_similarity >= 0.51 
+                            UNION 
+                                SELECT record2, total_similarity 
+                                FROM similarities 
+                                WHERE record1 = %(requestID)r 
+                                    AND total_similarity >= 0.51 
+                            ORDER BY total_similarity DESC LIMIT %(requestSimilar)r""" % ({'requestID' : requestID, 'requestSimilar' : requestSimilar}))
             
                 # get the result of the request 
                 values = c.fetchall()
@@ -646,11 +674,13 @@ class Csw2(object):
 
         # missing idone paramter in the request, so there is no "&idone="
         if 'idone' not in self.parent.kvp:
+            LOGGER.exception('Missing idone parameter')
             return self.exceptionreportahl('MissingParameterValue', 'idone',
             'Missing idone parameter')
         
         # missing idtwo paramter in the request, so there is no "&idtwo=" 
         if 'idtwo' not in self.parent.kvp:
+            LOGGER.exception('Missing idtwo parameter')
             return self.exceptionreportahl('MissingParameterValue', 'idtwo',
             'Missing idtwo parameter')
 
@@ -663,21 +693,25 @@ class Csw2(object):
 
         # when there is no value behind the idone paramter, only "&idone="
         if len(self.parent.kvp['idone']) < 1:
+            LOGGER.exception('Invalid idone parameter')
             return self.exceptionreportahl('InvalidParameterValue', 'idone',
             'Invalid idone parameter')
         
         # when there is more than one value behind the idone paramter (first .split(,))
         if len(self.parent.kvp['idone']) > 1:
+            LOGGER.exception('Invalid idone parameter. May have only one value.')
             return self.exceptionreportahl('InvalidParameterValue', 'idone',
             'Invalid idone parameter. May have only one value.')
         
         # when there is no value behind the idtwo paramter, only "&idtwo=" ((first .split(,))
         if len(self.parent.kvp['idtwo']) < 1:
+            LOGGER.exception('Invalid idtwo parameter.')
             return self.exceptionreportahl('InvalidParameterValue', 'idtwo',
             'Invalid idtwo parameter')
         
         # when there is more than one value behind the idtwo paramter
         if len(self.parent.kvp['idtwo']) > 1:
+            LOGGER.exception('Invalid idtwo parameter. May have only one value.')
             return self.exceptionreportahl('InvalidParameterValue', 'idtwo',
             'Invalid idtwo parameter. May have only one value.')
 
@@ -690,21 +724,25 @@ class Csw2(object):
             self.parent.kvp['outputformat'] not in
             self.parent.context.model['operations']['GetSimilarRecords']['parameters']
             ['outputFormat']['values']):
+            LOGGER.exception('Invalid outputformat parameter %s' %
+            self.parent.kvp['outputformat'])
             return self.exceptionreportahl('InvalidParameterValue',
             'outputformat', 'Invalid outputformat parameter %s' %
             self.parent.kvp['outputformat'])
         
         # check if idone exist
-        c.execute("SELECT identifier FROM records WHERE identifier = '"+ self.parent.kvp['idone'][0] +"'")
+        c.execute("SELECT identifier FROM records WHERE identifier = %r" % (self.parent.kvp['idone'][0]))
         values = c.fetchall()
         if not values:
+            LOGGER.exception('The id '+ self.parent.kvp['idone'][0] +' does not exist in the database.')
             return self.exceptionreportahl('InvalidParameterValue', 'id',
             'The id '+ self.parent.kvp['idone'][0] +' does not exist in the database.')
         
         # check if idtwo exist
-        c.execute("SELECT identifier FROM records WHERE identifier = '"+ self.parent.kvp['idtwo'][0] +"'")
+        c.execute("SELECT identifier FROM records WHERE identifier = %r" % (self.parent.kvp['idtwo'][0]))
         values = c.fetchall()
         if not values:
+            LOGGER.exception('The id '+ self.parent.kvp['idtwo'][0] +' does not exist in the database.')
             return self.exceptionreportahl('InvalidParameterValue', 'id',
             'The id '+ self.parent.kvp['idtwo'][0] +' does not exist in the database.')
             
@@ -713,13 +751,19 @@ class Csw2(object):
 
         # get the id values from the request 
         id1 = self.parent.kvp['idone'][0]
-        LOGGER.debug('Input id1 for request: %s', id1)
+        LOGGER.debug('Input id1 for request: %r', id1)
         id2 = self.parent.kvp['idtwo'][0]
-        LOGGER.debug('Input id2 for request: %s', id2)
+        LOGGER.debug('Input id2 for request: %r', id2)
         
         # sql request to the similarities table 
         # searching for the value of the similarity of the boundingbox of the two input ids
-        c.execute("SELECT geospatial_extent FROM similarities WHERE record1 = '"+ id1 +"' and record2 = '"+ id2 +"' or record1 = '"+ id2 +"' and record2 = '"+ id1 +"'")
+        c.execute("""SELECT geospatial_extent 
+                     FROM similarities 
+                     WHERE record1 = %(id1)r 
+                        AND record2 = %(id2)r 
+                        OR 
+                        record1 = %(id2)r 
+                        AND record2 = %(id1)r""" % ({'id1' : id1, 'id2' : id2}))
     
         # get the request result 
         values = c.fetchall()
@@ -1525,25 +1569,25 @@ class Csw2(object):
                             rp['rp']= \
                             self.parent.repository.queryables['_all'][rp['name']]
 
-                    # # import the similaritycalculation
-                    # # @author: Anika Graupner 
-                    # from pycsw.similaritycalculation import similaritycalculation
+                    # import the similaritycalculation
+                    # @author: Anika Graupner 
+                    from pycsw.similaritycalculation import similaritycalculation
 
-                    # # get the id of the record which was sendet to the server from the cli tool to start the similarity calculation 
-                    # # print(ttype['constraint']['values'])
-                    # sendid = ttype['constraint']['values']
-                    # sendid = sendid[0]
-                    # #print(values)
-                    # sendbbox = ttype['recordproperty'][1]['value']
-                    # sendbegin = ttype['recordproperty'][2]['value']
-                    # sendend = ttype['recordproperty'][3]['value']
-                    # sendformat = ttype['recordproperty'][4]['value']
+                    # get the id of the record which was sendet to the server from the cli tool to start the similarity calculation 
+                    # print(ttype['constraint']['values'])
+                    sentid = ttype['constraint']['values']
+                    sentid = sentid[0]
+                    #print(values)
+                    sentbbox = ttype['recordproperty'][1]['value']
+                    sentbegin = ttype['recordproperty'][2]['value']
+                    sentend = ttype['recordproperty'][3]['value']
+                    sentformat = ttype['recordproperty'][4]['value']
 
-                    # # no similaritycalculation if there is no calculated timeextent and no boundingbox 
-                    # if sendbbox is not None or sendbegin is not None:
-                    #     # start the calculation
-                    #     similaritycalculation.similaritycalculation(sendid, sendbbox, sendbegin, sendend, sendformat)
-                    #     LOGGER.info('Starting similarity calculation.')
+                    # no similaritycalculation if there is no calculated timeextent and no boundingbox 
+                    if sentbbox is not None or sentbegin is not None:
+                        # start the calculation
+                        similaritycalculation.similaritycalculation(sentid, sentbbox, sentbegin, sentend, sentformat)
+                        LOGGER.info('Starting similarity calculation from csw2.py.')
 
                     LOGGER.debug('Record Properties: %s.', ttype['recordproperty'])
                     try:
