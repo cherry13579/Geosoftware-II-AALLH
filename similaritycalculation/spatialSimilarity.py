@@ -34,7 +34,7 @@ def spatialOverlap(bboxA, bboxB):
 
     # print(intersectArea)
 
-    reachedPercentArea = intersectArea*100/largerArea
+    reachedPercentArea = intersectArea/largerArea
 
     reachedPercentArea = floor(reachedPercentArea * 100)/100
     # print(reachedPercentArea)
@@ -54,9 +54,9 @@ def similarArea(bboxA, bboxB):
         reachedPercentArea = 1
     else:
         if areaA >= areaB:
-            reachedPercentArea = areaB*100/areaA
+            reachedPercentArea = areaB/areaA
         else:
-            reachedPercentArea = areaA*100/areaB
+            reachedPercentArea = areaA/areaB
 
     reachedPercentArea = floor(reachedPercentArea*100)/100
     return reachedPercentArea
@@ -97,7 +97,7 @@ def spatialDistance(bboxA, bboxB):
         # print(distBetweenCenterPoints)
 
     if distBetweenCenterPoints is not None and longerDistance is not None:
-        distPercentage = (1 - (distBetweenCenterPoints/longerDistance)) * 100
+        distPercentage = (1 - (distBetweenCenterPoints/longerDistance))
         distPercentage = floor(distPercentage * 100)/100
         # print(distPercentage if distPercentage>0 else 0)
         return distPercentage if distPercentage>0 else 0
@@ -106,68 +106,32 @@ def spatialDistance(bboxA, bboxB):
         return 0
 
 
-# def sameDatasetType(file1, file2):
-#     file1isRaster = None
-#     file2isRaster = None
-#     try:
-#         gdal.UseExceptions()
-#         gdal.Open(file1)
-#         file1isRaster = True
-
-#         gdal.Open(file2)
-#         file2isRaster = True
-#     except:
-#         try:
-#             ogr.UseExceptions()
-#             args = ['ogrinfo', '-ro', '-so', '-al', '%s' % file1]
-#             process = Popen(args, stdout=PIPE, stderr=PIPE)
-#             file1isRaster = False
-#             args = ['ogrinfo', '-ro', '-so', '-al', '%s' % file2]
-#             process = Popen(args, stdout=PIPE, stderr=PIPE)
-#             file2isRaster = False
-#         except:
-#             return 0
-#         else:
-#             return 100
-#     else:
-#         return 100
-
-
 #############################################################################
 
 
 def _generateGeometryFromBbox(bbox):
-    source = osr.SpatialReference()
-    source.ImportFromEPSG(4326)
-    target = osr.SpatialReference()
-    target.ImportFromEPSG(2927)
-
     boxA = ogr.CreateGeometryFromJson("""{
             "type":"Polygon",
             "coordinates":[
                 [
                     [
-                        %f,%f
+                        %(minX)f,%(minY)f
                     ],
                     [
-                        %f,%f
+                        %(minX)f,%(maxY)f
                     ],
                     [
-                        %f,%f
+                        %(maxX)f,%(maxY)f
                     ],
                     [
-                        %f,%f
+                        %(maxX)f,%(minY)f
                     ],
                     [
-                        %f,%f
+                        %(minX)f,%(minY)f
                     ]
                 ]
             ]
-        }""" % (bbox[0],bbox[1], bbox[0], bbox[3], bbox[2], bbox[3], bbox[2], bbox[1], bbox[0], bbox[1]))
-
-    
-    transform = osr.CoordinateTransformation(source, target)
-    boxA.Transform(transform)
+        }""" % ({'minX':bbox[0], 'minY':bbox[1], 'maxX':bbox[2], 'maxY':bbox[3]}))
 
     return boxA
 
@@ -195,7 +159,6 @@ def _getMidPoint(bbox):
     line2 = ogr.CreateGeometryFromWkt(line2)
 
     intersectionPoint = line1.Intersection(line2)
-    z = intersectionPoint.ExportToWkt()
     intersectGeometry = ogr.CreateGeometryFromWkt(intersectionPoint.ExportToWkt())
 
     datatype = intersectGeometry.GetGeometryName()
@@ -214,9 +177,6 @@ def _getMidPoint(bbox):
 
         intersectionPoint = line1.Intersection(line2)
         intersectGeometry = ogr.CreateGeometryFromWkt(intersectionPoint.ExportToWkt())
-
-        datatype2 = intersectGeometry.GetGeometryName()
-
 
     return intersectGeometry
 
@@ -259,8 +219,8 @@ def _getMidPoint(bbox):
 
 # # Same BoundingBox
 # print("\n Same BoundingBox \n")
-# bbox1 = [0.439453,29.688053,3.911133,31.765537]
-# bbox2 = [0.439453,29.688053,3.911133,31.765537]
+# bbox1 = [124.99553571, 67.99553636, 165.00445788, 72.00446429]
+# bbox2 = [124.99553571, 67.99553636, 165.00445788, 72.00446429]
 # print(spatialDistance(bbox1, bbox2))
 # print(spatialOverlap(bbox1, bbox2))
 # print(similarArea(bbox1, bbox2))
@@ -280,3 +240,87 @@ def _getMidPoint(bbox):
 # print(spatialDistance(bbox1, bbox2))
 # print(spatialOverlap(bbox1, bbox2))
 # print(similarArea(bbox1, bbox2))
+
+# Geometry
+
+# 0.74
+# 0.41
+# 0.58
+
+#  Points
+
+# 0.99
+# 0.81
+# 1.0
+
+#  Line and Point
+
+# 0.49
+# 0.0
+# 1.0
+
+#  Polygon and Point
+
+# 0.5
+# 0.0
+# 0.0
+
+#  Same BoundingBox
+
+# 1.0
+# 1.0
+# 1.0
+
+#  Similar Bounding Box which are close to each other
+
+# 0.66
+# 0.17
+# 0.25
+
+#  Not so related Bounding Box
+
+# 0
+# 0.0
+# 0.0
+
+# Geometry
+
+# 0.74
+# 0.41
+# 0.57
+
+#  Points
+
+# 0.99
+# 0.99
+# 1.0
+
+#  Line and Point
+
+# 0.49
+# 0.99
+# 1.0
+
+#  Polygon and Point
+
+# 0.5
+# 0.0
+# 0.0
+
+#  Same BoundingBox
+
+# 1.0
+# 1.0
+# 1.0
+
+#  Similar Bounding Box which are close to each other
+
+# 0.66
+# 0.17
+# 0.25
+
+#  Not so related Bounding Box
+
+# 0
+# 0.0
+# 0.0
