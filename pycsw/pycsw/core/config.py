@@ -269,9 +269,6 @@ class StaticContext(object):
                         'parameters': {
                             'outputFormat': {
                                 'values': ['application/xml', 'application/json']
-                            },
-                            'ElementSetName': {
-                                'values': ['brief', 'summary', 'full']
                             }
                         }
                     },
@@ -284,9 +281,6 @@ class StaticContext(object):
                             'outputFormat': {
                                 'values': ['application/xml', 'application/json']
                             },
-                            'ElementSetName': {
-                                'values': ['brief', 'summary', 'full']
-                            }
                         }
                     }
                 },
@@ -442,9 +436,6 @@ class StaticContext(object):
                         'parameters': {
                             'outputFormat': {
                                 'values': ['application/xml', 'application/json']
-                            },
-                            'ElementSetName': {
-                                'values': ['brief', 'summary', 'full']
                             }
                         }
                     },
@@ -456,9 +447,6 @@ class StaticContext(object):
                         'parameters': {
                             'outputFormat': {
                                 'values': ['application/xml', 'application/json']
-                            },
-                            'ElementSetName': {
-                                'values': ['brief', 'summary', 'full']
                             }
                         }
                     }

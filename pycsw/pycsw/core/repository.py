@@ -305,7 +305,6 @@ class Repository(object):
 
     def update(self, record=None, recprops=None, constraint=None):
         ''' Update a record in the repository based on identifier '''
-        print("ja ich tue")
 
         if record is not None:
             identifier = getattr(record,

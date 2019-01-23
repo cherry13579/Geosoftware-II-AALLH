@@ -1,3 +1,5 @@
+# Author: Lia Kirsch
+
 import spatialSimilarity
 ##Geometry
 
@@ -16,7 +18,7 @@ def test_similarArea_Geometry():
 ## Points
 def test_spatialdistance_Points():
   total =  spatialSimilarity.spatialDistance([13.0078125, 50.62507306341435, 13.0078125, 50.62507306341435],[13.0082125, 50.62513301341435, 13.0082125, 50.62513301341435])
-  assert total == 99.01
+  assert total == 99.1
 
 def test_spatialOverlap_Points():
     total = spatialSimilarity.spatialOverlap([13.0078125, 50.62507306341435, 13.0078125, 50.62507306341435],[13.0082125, 50.62513301341435, 13.0082125, 50.62513301341435])

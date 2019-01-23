@@ -1,28 +1,27 @@
-body,html {
+body,
+html {
     height: 100%;
     margin: 0;
     padding: 0;
     background-color: rgb(2, 27, 44);
 }
 
-body{
-    background-image: url("../Projekt.png");
+body {
+    background-image: url("{{ url_for('static', filename='Projekt.png') }}");
     background-repeat: no-repeat;
     background-position: right;
     background-size: 8%;
     background-position-x: 95%;
     background-position-y: 0%;
-
-    
 }
 
 #map {
-    height: 680px;
-    margin: 10px;
+    height: 650px;
+    margin: 20px;
     border-radius: 5px;
 }
 
-#controls {
+.controls {
     position: absolute;
     top: 2em;
     left: 10%;
@@ -30,16 +29,8 @@ body{
     z-index: 2;
 }
 
-#rangeSlider {
-    width: 60%;
-}
 
-#dateString {
-    color: white;
-    font-size: 30px;
-}
-
-#info {
+/* #info {
     display: block;
     position: relative;
     margin: 0px auto;
@@ -49,8 +40,88 @@ body{
     border-radius: 3px;
     font-size: 12px;
     text-align: center;
-    color: rgb(255, 255, 255);
+    color: black;
     background: #fff;
+} */
+
+table {
+    border-color: blue;
+    border-radius: 5px;
+    width: 90%;
+    margin: auto;
+    color: white;
+    padding: 10px;
+    margin-bottom: 20px;
 }
 
-h1, h2, h3{text-align :center; color: antiquewhite;}
+th,td {
+    text-align: left;
+    padding: 8px;
+}
+
+th {
+    border-bottom: 3px solid whitesmoke;
+}
+
+tr:nth-child(even) {
+    background-color: #333399;
+}
+
+h1,h2,h3 {
+    /* text-align: center; */
+    color: antiquewhite;
+}
+
+.button {
+    border: 1px solid black;
+    padding: 15px 150px;
+    border-radius: 10px;
+    transition-duration: 0.2s;
+}
+
+.button:hover {
+    background-color:#dadabb;
+}
+
+.navi {
+    padding: 0;
+    height: 40px;
+    width: 40px;
+    position: fixed;
+    float: right;
+    z-index: 2;
+    border-radius: 100%;
+    right: 25px;
+}
+
+#toBottom {
+    bottom: 10px;
+    border-top: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+#toTop {
+    bottom: 50px;
+    border-bottom: none;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.center {
+    text-align: center;
+}
+
+#overlay {
+    position: fixed; /* Sit on top of the page content */
+    display: none; /* Hidden by default */
+    width: 100%; /* Full width (cover the whole page) */
+    height: 100%; /* Full height (cover the whole page) */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+    z-index: 3; /* Specify a stack order in case you're using a different order for other elements */
+    cursor: pointer; /* Add a pointer on hover */
+  }
