@@ -424,88 +424,116 @@ class Csw2(object):
 
         return node
 
-    # handle GetSimilarRecords Request
-    # function, which gets an id as input and returns a list of similar records
-    # could also get a parameter "similar" as input to to specify the number of records output 
-    # some parts were taken over from the GetRecordById function 
-    # @author: Anika Graupner
+    
     def getsimilarrecords(self):
+        '''
+        handle GetSimilarRecords Request
+        function, which gets an id as input and returns a list of similar records
+        could also get a parameter "similar" as input to to specify the number of records output 
+        some parts were taken over from the GetRecordById function (exceptions)
+        :author: Anika Graupner
+        :param self: parameters and values of the requests (kvp)
+        :returns: retunrns a xml with a list of the similar records of the input id of the request
+        '''
 
         import sqlite3 # imported for connection on our own functions for the similarities functionalities
 
-        print('getsimilarrecords is running in csw2')
+        LOGGER.info('getsimilarrecords is running in csw2.py')
 
         # first the connection is established to our database, to interact with the similarities table  
         # source: https://docs.python.org/3/library/sqlite3.html
         # @author: Aysel Tandik
         conn = sqlite3.connect(os.path.join('..', '..', 'db-data', 'data.db')) # path to the database in the docker container 
-        print(conn)
+        LOGGER.debug(conn)
         c = conn.cursor()
  
         # missing id paramter in the request, so there is no "&id="
         if 'id' not in self.parent.kvp:
-            return self.exceptionreport('MissingParameterValue', 'id',
+            LOGGER.exception('Missing id parameter.')
+            return self.exceptionreportahl('MissingParameterValue', 'id',
             'Missing id parameter')
 
         # when there is no value behind the id paramter, only "&id="
         if len(self.parent.kvp['id']) < 1:
-            return self.exceptionreport('InvalidParameterValue', 'id',
-            'Invalid id parameter')
+            LOGGER.exception('Invalid id parameter. No id available.')
+            return self.exceptionreportahl('InvalidParameterValue', 'id',
+            'Invalid id parameter. No id available.')
 
         # multiple ids will be seperated by commas 
         if self.parent.requesttype == 'GET':
             self.parent.kvp['id'] = self.parent.kvp['id'].split(',')
         
-        # # wrong outputformat in the request  
+        # wrong outputformat in the request  (only xml or json)
         if ('outputformat' in self.parent.kvp and
             self.parent.kvp['outputformat'] not in
             self.parent.context.model['operations']['GetSimilarRecords']['parameters']
             ['outputFormat']['values']):
-            return self.exceptionreport('InvalidParameterValue',
+            LOGGER.exception('Invalid outputformat parameter %s' %
+            self.parent.kvp['outputformat'])
+            return self.exceptionreportahl('InvalidParameterValue',
             'outputformat', 'Invalid outputformat parameter %s' %
             self.parent.kvp['outputformat'])
+        
+        # check if the input ids exist in the records database
+        j = 0
+        while j < len(self.parent.kvp['id']):
+            requestID = self.parent.kvp['id'][j]
+            c.execute("SELECT identifier FROM records WHERE identifier = %r" % (requestID))
+            values = c.fetchall()
+            if not values:
+                LOGGER.exception('The id %r does not exist in the database.' % (requestID))
+                return self.exceptionreportahl('InvalidParameterValue', 'id',
+                'The id %r does not exist in the database.' % (requestID))
+            else:
+                j+=1
         
         # in the following, the output for the response is build with python  xml.etree.ElementTree as usual in pycsw
         # in the server.py the xml is changed to json with the pycsw xml2json function 
 
-        # parent node 
+        # parent node for the xml
         node = etree.Element('GetSimilarRecordsResponse')
-
-        print(self.parent.kvp['id'])
             
         # if the paramter "similar" is not used 
         if 'similar' not in self.parent.kvp:
 
-            k = 0
+            LOGGER.info('No similar parameter in the request.')
 
             # for every id value of the id parameter 
+            k = 0
             while k < len(self.parent.kvp['id']):
 
                 # variable for the current id 
                 requestID = self.parent.kvp['id'][k]
-
-                # important for the sql request 
-                requestID = '"' + requestID + '"'
-
+                LOGGER.debug('Input id for request: %r', requestID)
                 print(requestID)
 
                 # sql request to the similarities table 
                 # searching for the ids and the value of the similarity for the current id 
                 # the values are ordered in descending order
-                # we set the maximum value to 20 similar records (when no similar parameter is given in the request), but only records with a similarity value of at least 51 are displayed
-                c.execute('SELECT record1, total_similarity FROM similarities WHERE record2 = '+ requestID +' AND total_similarity >= 51 UNION SELECT record2, total_similarity FROM similarities WHERE record1 = '+ requestID +' AND total_similarity >= 50 ORDER BY total_similarity DESC LIMIT 20')
+                # we set the maximum value to 20 similar records (when no similar parameter is given in the request), but only records with a similarity value of at least 0.51 are displayed
+                c.execute("""SELECT record1, total_similarity 
+                            FROM similarities 
+                            WHERE record2 = %(requestID)r 
+                                AND total_similarity >= 0.51 
+                            UNION 
+                                SELECT record2, total_similarity 
+                                FROM similarities 
+                                WHERE record1 = %(requestID)r 
+                                    AND total_similarity >= 0.51 
+                            ORDER BY total_similarity DESC LIMIT 20""" % ({'requestID' : requestID}))
             
                 # get the result of the request 
                 values = c.fetchall()
 
-                print(values)
-
-                # response if there are no similar records for the given id (can happen if the values are always below 51)
+                # response if there are no similar records for the given id (can happen if the values of the total similarities are always below 0.51)
                 if not values:
+
+                    LOGGER.info('No similar records.')
+
                     resultForInputRecord = etree.SubElement(node, 'resultsForInputRecords')
                     resultForInputRecord.set('inputId', str(self.parent.kvp['id'][k]))
                     listOfSimilarRecords = etree.SubElement(resultForInputRecord, 'listOfSimilarRecords')
-                    listOfSimilarRecords.set('info', 'No similar records or invalid id.')
+                    listOfSimilarRecords.set('info', 'No similar records.')
                 
                 # but if
                 else:
@@ -517,15 +545,8 @@ class Csw2(object):
                     # mainly formatting
                     i = 0
                     while i < len(values):
-                        print(values[i])
-                        value = str(values[i])
-                        value = value.replace('(', '').replace(')', '')
-                        print(value)
-                        identifier, similarityValue = value.split(",")
-                        identifier = identifier.replace("'", '')
-                        print(identifier)
-                        similarityValue = similarityValue.replace(' ', '')
-                        print(similarityValue)
+                        identifier = str(values[i][0])
+                        similarityValue = str(values[i][1])
 
                         rec = etree.SubElement(listOfSimilarRecords, 'record')
                         etree.SubElement(rec, 'identifier').text = identifier
@@ -540,47 +561,78 @@ class Csw2(object):
         # when a similar parameter is given in the request
         else:
 
+            LOGGER.info('Paramter similar in the request.')
+
+            # multiple similar parameter values will be seperated by commas 
+            if self.parent.requesttype == 'GET':
+                self.parent.kvp['similar'] = self.parent.kvp['similar'].split(',')
+
             # when there is no value behind the similar paramter, only "&similar="
             if len(self.parent.kvp['similar']) < 1:
-                return self.exceptionreport('InvalidParameterValue', 'similar',
-                'Invalid similar parameter')
+                LOGGER.exception('Invalid similar parameter. No value specified.')
+                return self.exceptionreportahl('InvalidParameterValue', 'similar',
+                'Invalid similar parameter. No value specified.')
             
             # when there are more than one value behind the similar paramter
             if len(self.parent.kvp['similar']) > 1:
-                return self.exceptionreport('InvalidParameterValue', 'similar',
+                LOGGER.exception('Invalid similar parameter. May only have one value.')
+                return self.exceptionreportahl('InvalidParameterValue', 'similar',
                 'Invalid similar parameter. May only have one value.') 
+
+            # checks if the value of the similar parameter is an integer 
+            if not self.parent.kvp['similar'][0].isdigit():
+                LOGGER.exception('Invalid similar parameter. The value must be an integer.')
+                return self.exceptionreportahl('InvalidParameterValue', 'similar',
+                'Invalid similar parameter. The value must be an integer.')
+
+            similarparamvalue = int(self.parent.kvp['similar'][0])
+
+            # when the value of the similar parameter value is not between 1 and 50 
+            # 50 is the maximum value we set
+            if similarparamvalue not in range(1,51):
+                LOGGER.exception('Invalid similar parameter. The value must be between 1 and 50.')
+                return self.exceptionreportahl('InvalidParameterValue', 'similar',
+                'Invalid similar parameter. The value must be between 1 and 50.') 
 
             # get the value of the similar parameter from the request 
             requestSimilar = self.parent.kvp['similar'][0]
-
-            k = 0
+            LOGGER.debug('Value of the similar parameter: %r', requestSimilar)
 
             # for every id value of the id parameter 
+            k = 0
             while k < len(self.parent.kvp['id']):
 
                 # variable for the current id 
                 requestID = self.parent.kvp['id'][k]
-
-                # important for the sql request
-                requestID = '"' + requestID + '"'
+                LOGGER.debug('Input id for request: %r', requestID)
 
                 # sql request to the similarities table 
                 # searching for the ids and the value of the similarity for the current id 
                 # the values are ordered in descending order
                 # the number of the records in the list of the respoinse depends on the similar parameter
-                c.execute('SELECT record1, total_similarity FROM similarities WHERE record2 = '+ str(requestID) +' AND total_similarity >= 51 UNION SELECT record2, total_similarity FROM similarities WHERE record1 = '+ str(requestID) +' AND total_similarity >= 50 ORDER BY total_similarity DESC LIMIT '+ requestSimilar +'')
+                c.execute("""SELECT record1, total_similarity 
+                             FROM similarities 
+                             WHERE record2 = %(requestID)r 
+                                AND total_similarity >= 0.51 
+                            UNION 
+                                SELECT record2, total_similarity 
+                                FROM similarities 
+                                WHERE record1 = %(requestID)r 
+                                    AND total_similarity >= 0.51 
+                            ORDER BY total_similarity DESC LIMIT %(requestSimilar)r""" % ({'requestID' : requestID, 'requestSimilar' : requestSimilar}))
             
                 # get the result of the request 
                 values = c.fetchall()
 
-                print(values)
-
-                # response if there are no similar records for the given id (can happen if the values are always below 51)
+                # response if there are no similar records for the given id (can happen if the values are always below 0.51)
                 if not values:
+
+                    LOGGER.info('No similar records.')
+
                     resultForInputRecord = etree.SubElement(node, 'resultsForInputRecords')
                     resultForInputRecord.set('inputId', str(self.parent.kvp['id'][k]))
                     listOfSimilarRecords = etree.SubElement(resultForInputRecord, 'listOfSimilarRecords')
-                    listOfSimilarRecords.set('info', 'No similar records or invalid id.')
+                    listOfSimilarRecords.set('info', 'No similar records.')
                 
                 # but if
                 else:
@@ -594,13 +646,9 @@ class Csw2(object):
                     # mainly formatting 
                     while i < len(values):
                         print(values[i])
-                        value = str(values[i])
-                        value = value.replace('(', '').replace(')', '')
-                        print(value)
-                        identifier, similarityValue = value.split(",")
-                        identifier = identifier.replace("'", '')
+                        identifier = str(values[i][0])
                         print(identifier)
-                        similarityValue = similarityValue.replace(' ', '')
+                        similarityValue = str(values[i][1])
                         print(similarityValue)
 
                         rec = etree.SubElement(listOfSimilarRecords, 'record')
@@ -613,30 +661,37 @@ class Csw2(object):
 
             return node
     
-    # handle GetSimilarBBox Request
-    # function, which gets two ids as input and returns the similarity value of the boundingbox for the two input records 
-    # some parts were taken over from the GetRecordById function 
-    # @author: Aysel Tandik, Anika Graupner
+    
     def getsimilaritybbox(self, raw=False):
+        '''
+        handle GetSimilarBBox Request
+        function, which gets two ids as input and returns the similarity value of the boundingbox for the two input records 
+        some parts were taken over from the GetRecordById function 
+        :authors: Aysel Tandik, Anika Graupner
+        :param self: parameters and values of the requests (kvp)
+        :returns: retunrns a xml with the inputids and the similarity value of the bbox
+        '''
+
+        LOGGER.info('getsimilaritybbox is running in csw2.py')
 
         # 05.12.18, source: https://docs.python.org/3/library/sqlite3.html
         # author: Aysel Tandik
         # connection to database 
         import sqlite3 # imported for connection on our own functions for the similarities functionalities 
-        print('getsimilaritybbox is running in csw2')
         conn = sqlite3.connect(os.path.join('..', '..', 'db-data', 'data.db'))
+        LOGGER.debug(conn)
         c = conn.cursor()
-
-        print(c.fetchone())
 
         # missing idone paramter in the request, so there is no "&idone="
         if 'idone' not in self.parent.kvp:
-            return self.exceptionreport('MissingParameterValue', 'idone',
+            LOGGER.exception('Missing idone parameter')
+            return self.exceptionreportahl('MissingParameterValue', 'idone',
             'Missing idone parameter')
         
         # missing idtwo paramter in the request, so there is no "&idtwo=" 
         if 'idtwo' not in self.parent.kvp:
-            return self.exceptionreport('MissingParameterValue', 'idtwo',
+            LOGGER.exception('Missing idtwo parameter')
+            return self.exceptionreportahl('MissingParameterValue', 'idtwo',
             'Missing idtwo parameter')
 
         # split with comma
@@ -648,73 +703,100 @@ class Csw2(object):
 
         # when there is no value behind the idone paramter, only "&idone="
         if len(self.parent.kvp['idone']) < 1:
-            return self.exceptionreport('InvalidParameterValue', 'idone',
+            LOGGER.exception('Invalid idone parameter')
+            return self.exceptionreportahl('InvalidParameterValue', 'idone',
             'Invalid idone parameter')
         
         # when there is more than one value behind the idone paramter (first .split(,))
         if len(self.parent.kvp['idone']) > 1:
-            return self.exceptionreport('InvalidParameterValue', 'idone',
+            LOGGER.exception('Invalid idone parameter. May have only one value.')
+            return self.exceptionreportahl('InvalidParameterValue', 'idone',
             'Invalid idone parameter. May have only one value.')
         
         # when there is no value behind the idtwo paramter, only "&idtwo=" ((first .split(,))
         if len(self.parent.kvp['idtwo']) < 1:
-            return self.exceptionreport('InvalidParameterValue', 'idtwo',
+            LOGGER.exception('Invalid idtwo parameter.')
+            return self.exceptionreportahl('InvalidParameterValue', 'idtwo',
             'Invalid idtwo parameter')
         
         # when there is more than one value behind the idtwo paramter
         if len(self.parent.kvp['idtwo']) > 1:
-            return self.exceptionreport('InvalidParameterValue', 'idtwo',
+            LOGGER.exception('Invalid idtwo parameter. May have only one value.')
+            return self.exceptionreportahl('InvalidParameterValue', 'idtwo',
             'Invalid idtwo parameter. May have only one value.')
 
         # no outputschema
         if 'outputschema' not in self.parent.kvp:
             self.parent.kvp['outputschema'] = self.parent.context.namespaces['csw']
 
-        # # wrong outputformat in the request  
+        # wrong outputformat in the request (only json or xml)
         if ('outputformat' in self.parent.kvp and
             self.parent.kvp['outputformat'] not in
             self.parent.context.model['operations']['GetSimilarRecords']['parameters']
             ['outputFormat']['values']):
-            return self.exceptionreport('InvalidParameterValue',
+            LOGGER.exception('Invalid outputformat parameter %s' %
+            self.parent.kvp['outputformat'])
+            return self.exceptionreportahl('InvalidParameterValue',
             'outputformat', 'Invalid outputformat parameter %s' %
             self.parent.kvp['outputformat'])
-    
+        
+        # check if idone exist
+        c.execute("SELECT identifier FROM records WHERE identifier = %r" % (self.parent.kvp['idone'][0]))
+        values = c.fetchall()
+        if not values:
+            LOGGER.exception('The id '+ self.parent.kvp['idone'][0] +' does not exist in the database.')
+            return self.exceptionreportahl('InvalidParameterValue', 'id',
+            'The id '+ self.parent.kvp['idone'][0] +' does not exist in the database.')
+        
+        # check if idtwo exist
+        c.execute("SELECT identifier FROM records WHERE identifier = %r" % (self.parent.kvp['idtwo'][0]))
+        values = c.fetchall()
+        if not values:
+            LOGGER.exception('The id '+ self.parent.kvp['idtwo'][0] +' does not exist in the database.')
+            return self.exceptionreportahl('InvalidParameterValue', 'id',
+            'The id '+ self.parent.kvp['idtwo'][0] +' does not exist in the database.')
+            
         # parent node
         node = etree.Element('GetSimilarityBBoxResponse')
 
         # get the id values from the request 
         id1 = self.parent.kvp['idone'][0]
+        LOGGER.debug('Input id1 for request: %r', id1)
         id2 = self.parent.kvp['idtwo'][0]
-
-        # important for the sql request
-        id1 = '"' + id1 + '"'
-        id2 = '"' + id2 + '"'
-
-        print(id1)
-        print(id2)
+        LOGGER.debug('Input id2 for request: %r', id2)
         
         # sql request to the similarities table 
         # searching for the value of the similarity of the boundingbox of the two input ids
-        c.execute('SELECT bbox FROM similarities WHERE record1 = '+ id1 +' and record2 = '+ id2 +'')
+        c.execute("""SELECT geospatial_extent 
+                     FROM similarities 
+                     WHERE record1 = %(id1)r 
+                        AND record2 = %(id2)r 
+                        OR 
+                        record1 = %(id2)r 
+                        AND record2 = %(id1)r""" % ({'id1' : id1, 'id2' : id2}))
     
         # get the request result 
         values = c.fetchall()
 
-        print(values)
+        # if there is no similarity value of the two input ids of the bbox 
+        if not values:
 
-        # get the value out of the list (0 because it can only be one value)
-        value = str(values[0])
-        print(value)
+            LOGGER.info('No simialr value for the bbox of the two input ids.')
 
-        # mainly formatting 
-        value = value.replace('(', '').replace(')', '')
-        value = value.replace(',', '')
-        print(value)
+            # add the value of the bbox to the response 
+            etree.SubElement(node, 'inputid1').text = self.parent.kvp['idone'][0]
+            etree.SubElement(node, 'inputid2').text = self.parent.kvp['idtwo'][0]
+            etree.SubElement(node, 'similarityValueOfTheBBox').text = 'No similarity value.'
+        
+        else:
 
-        # add the value of the bbox to the response 
-        etree.SubElement(node, 'inputid1').text = self.parent.kvp['idone'][0]
-        etree.SubElement(node, 'inputid2').text = self.parent.kvp['idtwo'][0]
-        etree.SubElement(node, 'similarityValueOfTheBBox').text = value
+            # get the value out of the list (0 because it can only be one value)
+            value = str(values[0][0])
+
+            # add the value of the bbox to the response 
+            etree.SubElement(node, 'inputid1').text = self.parent.kvp['idone'][0]
+            etree.SubElement(node, 'inputid2').text = self.parent.kvp['idtwo'][0]
+            etree.SubElement(node, 'similarityValueOfTheBBox').text = value
     
         return node
 
@@ -1415,6 +1497,7 @@ class Csw2(object):
         LOGGER.debug('Transaction list: %s', self.parent.kvp['transactions'])
 
         for ttype in self.parent.kvp['transactions']:
+            print(ttype)
             if ttype['type'] == 'insert':
                 try:
                     record = metadata.parse_record(self.parent.context,
@@ -1487,6 +1570,7 @@ class Csw2(object):
                                         if value == rp['name']:  # match
                                             rp['rp'] = {'xpath': value, 'name': key}
                                             rp['rp']['dbcol'] = self.parent.repository.queryables['_all'][key]
+
                                             break
                             else:
                                 return self.exceptionreport('NoApplicableCode',
@@ -1494,6 +1578,26 @@ class Csw2(object):
                         else:
                             rp['rp']= \
                             self.parent.repository.queryables['_all'][rp['name']]
+
+                    # import the similaritycalculation
+                    # @author: Anika Graupner 
+                    from pycsw.similaritycalculation import similaritycalculation
+
+                    # get the id of the record which was sendet to the server from the cli tool to start the similarity calculation 
+                    # print(ttype['constraint']['values'])
+                    sentid = ttype['constraint']['values']
+                    sentid = sentid[0]
+                    #print(values)
+                    sentbbox = ttype['recordproperty'][1]['value']
+                    sentbegin = ttype['recordproperty'][2]['value']
+                    sentend = ttype['recordproperty'][3]['value']
+                    sentformat = ttype['recordproperty'][4]['value']
+
+                    # no similaritycalculation if there is no calculated timeextent and no boundingbox 
+                    if sentbbox is not None or sentbegin is not None:
+                        # start the calculation
+                        similaritycalculation.similaritycalculation(sentid, sentbbox, sentbegin, sentend, sentformat)
+                        LOGGER.info('Starting similarity calculation from csw2.py.')
 
                     LOGGER.debug('Record Properties: %s.', ttype['recordproperty'])
                     try:
@@ -2259,6 +2363,45 @@ class Csw2(object):
         ''' Generate ExceptionReport '''
         self.parent.exception = True
         self.parent.status = 'OK'
+
+        try:
+            language = self.parent.config.get('server', 'language')
+            ogc_schemas_base = self.parent.config.get('server', 'ogc_schemas_base')
+        except:
+            language = 'en-US'
+            ogc_schemas_base = self.parent.context.ogc_schemas_base
+
+        node = etree.Element(util.nspath_eval('ows:ExceptionReport',
+        self.parent.context.namespaces), nsmap=self.parent.context.namespaces,
+        version='1.2.0', language=language)
+
+        node.attrib[util.nspath_eval('xsi:schemaLocation',
+        self.parent.context.namespaces)] = \
+        '%s %s/ows/1.0.0/owsExceptionReport.xsd' % \
+        (self.parent.context.namespaces['ows'], ogc_schemas_base)
+
+        exception = etree.SubElement(node, util.nspath_eval('ows:Exception',
+        self.parent.context.namespaces),
+        exceptionCode=code, locator=locator)
+
+        exception_text = etree.SubElement(exception,
+        util.nspath_eval('ows:ExceptionText',
+        self.parent.context.namespaces))
+
+        try:
+            exception_text.text = text
+        except ValueError as err:
+            exception_text.text = repr(text)
+
+        return node
+    
+    # exceptionreport of A²HL² that changes also the number of the statuscode 
+    # most of the function based on the existing exception report
+    # @author: Anika Graupner  
+    def exceptionreportahl(self, code, locator, text):
+        ''' Generate ExceptionReport '''
+        self.parent.exception = True
+        self.parent.status = code # be taken over from the exceptionreport in csw3.py  
 
         try:
             language = self.parent.config.get('server', 'language')

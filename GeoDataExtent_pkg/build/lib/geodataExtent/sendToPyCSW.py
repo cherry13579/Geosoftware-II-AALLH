@@ -19,7 +19,6 @@ from geodataExtent import getTimeExtent as timeext
 @click.option('--id', '-i', 'ident', prompt="Please enter correct file ID for PyCSW", help="PyCSW ID of corrosponding file")
 def main(path, name, ident):
     """CLI-Tool for extracting the spatial and temporal extant of a selected Geodile and sends the results to the corrosponding ID in PyCSW to update the entery. 
-    \n@param path     Text/Path: Path to the folder with Geodata \n@param name     Text: Filename \n@param id       Text: ID of the entery in PyCSW
 
     \nReturns the XML Response of PyCSW after the update in the consloe
     """

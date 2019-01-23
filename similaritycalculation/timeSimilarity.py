@@ -16,7 +16,7 @@ def timeLength(timeA, timeB):
     lengthB = endB - startB
 
     if lengthA == lengthB:
-        return 100
+        return 1
     else:
         if lengthA > lengthB:
             lengthPercentage = lengthB/lengthA
@@ -30,7 +30,7 @@ def timeLength(timeA, timeB):
 def timeOverlap(timeA, timeB):
     if DateTime(timeA[0]) == DateTime(timeB[0]) and DateTime(timeA[1]) == DateTime(timeB[1]):
         # timeA and timeB are equal
-        return 100
+        return 1
 
     # start A below start B
     if DateTime(timeA[0]) <= DateTime(timeB[0]):
@@ -67,7 +67,7 @@ def timeOverlap(timeA, timeB):
 
 def similarInterval(timeA, timeB):
     if timeA[2] == timeB[2]:
-        return 100
+        return 1
     else:
         if timeA[2] > timeB[2]:
             intervalPercentage = timeB[2]/timeA[2]
@@ -81,3 +81,4 @@ def similarInterval(timeA, timeB):
 # print(timeOverlap(['1935/01/01 00:00:00 GMT+0', '2014/01/01 00:00:00 GMT+0', 365.253164556962], ['2013/01/01 00:00:00 GMT+0', '2018/03/28 12:43:14.034000 GMT+0', 0]))
 
 # print(DateTime('1935/01/01 00:00:10 GMT+0') - DateTime('1935/01/01 00:00:00 GMT+0'))
+print(timeLength(['1956/01/01 00:00:00 GMT+0', '2088/01/01 00:00:00 GMT+0', 730.5], ['1957/01/01 00:00:00 GMT+0', '2088/01/01 00:00:00 GMT+0', 123]))
