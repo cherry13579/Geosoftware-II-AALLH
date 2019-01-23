@@ -15,15 +15,16 @@ def spatialOverlap(bboxA, bboxB):
     areaA = boxA.GetArea()
     areaB = boxB.GetArea()
 
-    if (areaA == 0) and (areaB == 0):
-        bufferDist = 328 # foot = 500 Meter
+    if areaA == 0:
+        bufferDist = 500
         boxA = boxA.Buffer(bufferDist)
-        boxB = boxB.Buffer(bufferDist)
-
         areaA = boxA.GetArea()
-        areaB = boxB.GetArea()
+    
+    if areaB == 0:
+        bufferDist = 500
+        boxB = boxB.Buffer(bufferDist)
+        areaB = boxB.GetArea() 
 
-    # print(areaA)
 
     largerArea = areaA if areaA >= areaB else areaB
 
@@ -110,6 +111,12 @@ def spatialDistance(bboxA, bboxB):
 
 
 def _generateGeometryFromBbox(bbox):
+    source = osr.SpatialReference()
+    source.ImportFromEPSG(4326)
+
+    target = osr.SpatialReference()
+    target.ImportFromEPSG(25832)
+
     boxA = ogr.CreateGeometryFromJson("""{
             "type":"Polygon",
             "coordinates":[
@@ -133,6 +140,9 @@ def _generateGeometryFromBbox(bbox):
             ]
         }""" % ({'minX':bbox[0], 'minY':bbox[1], 'maxX':bbox[2], 'maxY':bbox[3]}))
 
+
+    transform = osr.CoordinateTransformation(source, target)
+    boxA.Transform(transform)
     return boxA
 
 def _getDistance(startingpoint, endpoint):
@@ -203,7 +213,7 @@ def _getMidPoint(bbox):
 
 # # Line and Point
 # print("\n Line and Point \n")
-# bbox1 = [11.0078125, 50.62507306341435, 13.0078125, 50.62507306341435]
+# bbox1 = [10.0078125, 50.62507306341435, 13.0078125, 50.62507306341435]
 # bbox2 = [13.0082125, 50.62513301341435, 13.0082125, 50.62513301341435]
 # print(spatialDistance(bbox1, bbox2))
 # print(spatialOverlap(bbox1, bbox2))
