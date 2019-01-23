@@ -486,12 +486,16 @@ class Csw3(object):
 
         return node
     
-    # handle GetSimilarRecords Request
-    # function, which gets an id as input and returns a list of similar records
-    # could also get a parameter "similar" as input to to specify the number of records output 
-    # some parts were taken over from the GetRecordById function (exceptions)
-    # @author: Anika Graupner
     def getsimilarrecords(self):
+        '''
+        handle GetSimilarRecords Request
+        function, which gets an id as input and returns a list of similar records
+        could also get a parameter "similar" as input to to specify the number of records output 
+        some parts were taken over from the GetRecordById function (exceptions)
+        :author: Anika Graupner
+        :param self: parameters and values of the requests (kvp)
+        :returns: retunrns a xml with a list of the similar records of the input id of the request
+        '''
 
         import sqlite3 # imported for connection on our own functions for the similarities functionalities
 
@@ -718,11 +722,15 @@ class Csw3(object):
 
             return node
     
-    # handle GetSimilarBBox Request
-    # function, which gets two ids as input and returns the similarity value of the boundingbox for the two input records 
-    # some parts were taken over from the GetRecordById function 
-    # @author: Aysel Tandik, Anika Graupner
     def getsimilaritybbox(self, raw=False):
+        '''
+        handle GetSimilarBBox Request
+        function, which gets two ids as input and returns the similarity value of the boundingbox for the two input records 
+        some parts were taken over from the GetRecordById function 
+        :authors: Aysel Tandik, Anika Graupner
+        :param self: parameters and values of the requests (kvp)
+        :returns: retunrns a xml with the inputids and the similarity value of the bbox
+        '''
 
         LOGGER.info('getsimilaritybbox is running in csw3.py')
 

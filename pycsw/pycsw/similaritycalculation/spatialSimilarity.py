@@ -2,7 +2,7 @@ from math import *
 from osgeo import gdal, ogr, osr
 import logging 
 
-#LOGGER = logging.get#LOGGER(__name__)
+LOGGER = logging.getLogger(__name__)
 
 #LOGGER.info('Spatial similarity is calculated.')
 
@@ -21,9 +21,6 @@ def spatialOverlap(bboxA, bboxB):
     intersection = poly1.Intersection(poly2)
     print(union, intersection)
     print ("WICHTIG "+ union.ExportToWkt())
-
-
-
 
     print(bboxA, bboxB)
     # get Boundingboxes as Geometries

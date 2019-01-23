@@ -1,5 +1,6 @@
 # main function of the similarity calculation 
-# @author Anika Graupner 
+# @author: Anika Graupner 
+# @author: Henry Fock
 
 import logging 
 import os
@@ -12,19 +13,33 @@ from pycsw.similaritycalculation import generalSimilarity as gs
 
 LOGGER = logging.getLogger(__name__)
 
-def similaritycalculation(id1, bbox, timebegin1, timeend1, format1): 
+def similaritycalculation(id1, bbox, timebegin1, timeend1, format1):
+    '''
+    Main function of the similarity calculation.
+    Runs the functions for the similarity calculations.
+    :authors: Anika Graupner, Henry Fock
+    :param id1: Identifier of the udated record
+    :param bbox: Bbox of the updated record 
+    :param timebegin1: timebegin of the updated record
+    :param timeend1: timeend of the updated record
+    :param format1: fileformat of the uodated record
+    ''' 
 
-    #LOGGER.info('Similaritycalculation started.')
+    LOGGER.info('Similaritycalculation started.')
+
+    print(timebegin1)
+    print(timeend1)
 
     # connection to the database 
     conn = sqlite3.connect(os.path.join('..', '..', 'db-data', 'data.db')) 
     LOGGER.debug(conn)
     c = conn.cursor()
 
-    #
+    # test if there is only one record in the database
+    # if yes, the calculation will not run
     c.execute("SELECT identifier FROM records")
     values = c.fetchall()
-    if values:
+    if len(values) > 1:
 
         # formatting the input for the functions of the timeSimilarity
         timeA = [timebegin1, timeend1]
@@ -62,11 +77,8 @@ def similaritycalculation(id1, bbox, timebegin1, timeend1, format1):
         # select all important values from the database for similarity calculation except the values of the updated record 
         c.execute("SELECT identifier, title, time_begin, time_end, creator, wkt_geometry, format FROM records WHERE NOT identifier = %r" % (id1))
         values = c.fetchall()
-        print(len(values))
-
 
         rows = []
-
         # for each record in the database
         i = 0
         while i < len(values):
@@ -132,36 +144,27 @@ def similaritycalculation(id1, bbox, timebegin1, timeend1, format1):
                 totalSimilarity = generalSimilarity + spatialSimilarity + timeSimilarity
                 #LOGGER.info('Total similarity for dataset '+ id1 +' and dataset '+ id2 +': '+ timeSimilarity + '.')
 
-                #  c.execute("""insert into similarities (record1, record2, total_similarity, geospatial_extent, temporal_extent, general_extent) 
-                #  values (%(id1)r, %(id2)r, %(totalSimilarity)r, %(spatialSimilarity)r, %(timeSimilarity)r, %(generalSimilarity)r""" %({'id1' : id1, 'id2' : id2, 'totalSimilarity' : totalSimilarity, spatialSimilarity, timeSimilarity, generalSimilarity}))
-
                 # new tupel add to rows list (later inserted in the database table similarities)
                 newrow = (id1, id2, totalSimilarity, spatialSimilarity, timeSimilarity, generalSimilarity)
                 rows.append(newrow)
 
                 i+=1
 
-        # print(rows)
+        LOGGER.debug(rows)
 
         # insert the calculated values into the database 
         for entry in rows:
-            # values = ""
-            # for value in entry:
-            #     values += str(value) + ","
 
             sql = """insert into similarities (record1, record2, total_similarity, geospatial_extent, temporal_extent, general_extent) 
                     values (?,?,?,?,?,?)"""
-            print(sql)
+
             c.execute(sql, entry)
             conn.commit()
 
-        c.execute("SELECT * FROM similarities")
-        print(c.fetchall())
-
-    #     #LOGGER.info('Similarity calculation finished.')
+        LOGGER.info('Similarity calculation finished.')
     
-    # # else:
-    # #     LOGGER.info('Nothing to compare.')
+    else:
+        LOGGER.info('Nothing to compare.')
 
 
 
