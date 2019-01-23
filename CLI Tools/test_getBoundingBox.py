@@ -35,8 +35,8 @@ def test_getBBCsvPolygon():
 
 # Dataformat NetCdf testing
 def test_getBBNetCdf():
-    result = getBoundingBox.getBoundingBox("ECMWF_ERA-40_subset.nc", file_path)
-    assert result == ([0.0, -90.0, 357.5, 90.0], None)
+    result = getBoundingBox.getBoundingBox("cami_0000-09-01_64x128_L26_c030918.nc", file_path)
+    assert result == ([0.0, -87.86379883923348, 357.1875, 87.86379883923263], None)
 
 # Dataformat Shape testing Line, Polgyon and one additional file
 def test_getBBShapeLine():
