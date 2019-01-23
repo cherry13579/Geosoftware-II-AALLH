@@ -56,3 +56,13 @@ def test_CRS():
 
     string2 = str(stringResult[1])
     assert 0 == string2.find("8.591308") # Latitude
+
+# Testing the situation, where the datatype is not supported
+def test_ErrorFile():
+    errorfile = getBoundingBox.getBoundingBox("error.file", file_path)
+    assert errorfile == (None, 'type .file not yet supported')
+
+# Testing where input is not valid
+def test_FalseInputFile():
+    falseInput = getBoundingBox.getBoundingBox("falsetime.geojson", file_path)
+    assert falseInput == (None, 'File Error!')
