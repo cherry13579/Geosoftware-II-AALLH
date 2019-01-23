@@ -76,6 +76,18 @@ RUN pip3 install --upgrade pip setuptools \
   && pip3 install --requirement requirements-pg.txt \
   && pip3 install gunicorn 
 
+RUN apk add --no-cache \
+    --repository http://dl-cdn.alpinelinux.org/alpine/edge/main/ \
+    #--allow-untrusted \
+    libcrypto1.1 \
+    && apk add --no-cache \
+    --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ \
+    #--allow-untrusted \
+    gdal \
+    gdal-dev
+
+RUN pip3 install gdal
+
 COPY pycsw pycsw/
 COPY bin bin/
 COPY setup.py .

@@ -105,6 +105,8 @@ def main(path, name, ident):
 
     if type(time) is list:
         start, end = time[:2]
+        start = str(start)
+        end = str(end)
     else:
         click.echo(time, err=True)
 
