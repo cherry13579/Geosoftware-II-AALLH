@@ -1,6 +1,5 @@
 import csv
 import os
-import sys
 import json
 import functools
 import sqlite3
@@ -170,7 +169,7 @@ def getTimeExtent(name, path):
                 avgInt = 0
                 if len(isoTimeSeq) > 1:
                     interval = []
-                    
+
                     for i in range(len(isoTimeSeq)-1):
                         interval.append(isoTimeSeq[i+1] - isoTimeSeq[i])
 
