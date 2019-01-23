@@ -1,6 +1,5 @@
 import csv
 import os
-import sys
 import json
 import functools
 import sqlite3
@@ -151,11 +150,12 @@ def getTimeExtent(name, path):
             isoTimeSeq = []
             if jsonDict["type"] == "FeatureCollection":
                 prop = ""
-                if "time" in jsonDict["features"][0]:
+                                    
+                if "time" in jsonDict["features"][0]["properties"]:
                     prop = "time"
-                elif "date" in jsonDict["features"][0]:
+                elif "date" in jsonDict["features"][0]["properties"]:
                     prop = "date"
-                elif "dateTime" in jsonDict["features"][0]:
+                elif "dateTime" in jsonDict["features"][0]["properties"]:
                     prop = "dateTime"
                 else:
                     return (None, "no time data available")
@@ -170,11 +170,11 @@ def getTimeExtent(name, path):
                 if len(isoTimeSeq) > 1:
                     interval = []
 
-                for i in range(len(isoTimeSeq)-1):
-                    interval.append(isoTimeSeq[i+1] - isoTimeSeq[i])
+                    for i in range(len(isoTimeSeq)-1):
+                        interval.append(isoTimeSeq[i+1] - isoTimeSeq[i])
 
-                avgInt = functools.reduce(
-                    lambda x, y: x + y, interval) / float(len(interval))
+                    avgInt = functools.reduce(
+                        lambda x, y: x + y, interval) / float(len(interval))
 
                 return ([isoTimeSeq[0].Date(), isoTimeSeq[-1].Date(), avgInt], None)
             else:

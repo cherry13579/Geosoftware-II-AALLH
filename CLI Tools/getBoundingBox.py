@@ -63,6 +63,8 @@ def getBoundingBox(name, path):
             dataset = ogr.Open(filepath)
             layer = dataset.GetLayer()
             crs = layer.GetSpatialRef()
+            if crs is None:
+                return (None, "CRS does not exist!")
             if crs.IsProjected() == 1:
                 crs = int(crs.GetAttrValue("PROJCS|AUTHORITY", 1))
             elif crs.IsGeographic() == 1:
@@ -168,11 +170,15 @@ def getBoundingBox(name, path):
         """
         try:
             ds = xr.open_dataset(filepath)
+
+            # get Dimensions
+            dimensions = list(ds.to_dict()['dims'].keys())
+            lon, lat = getLonLatCrs(dimensions)[:-1]
             # transform coordinates section in a dictionary
             coordinates = ds.to_dict()['coords']
             # get the coordinates as a list
-            lats = coordinates['latitude']['data']
-            longs = coordinates['longitude']['data']
+            lats = coordinates[lat]['data']
+            longs = coordinates[lon]['data']
 
             # taking the smallest and highest coordinates from the lists
             bbox = [min(longs), min(lats), max(longs), max(lats)]
@@ -257,24 +263,8 @@ def getBoundingBox(name, path):
             header = next(head)[0].replace(";", ",").split(",")
 
             # searching for valid names for latitude and longitude
-            def getLatLonCrs(header):
-                """get the correct names of the columns holding the coordinates
-                @param header Header of the CSV
-                @returns (lon, lat, crs) where lon, lat, crs are the column names
-                """
-                lng = None
-                lat = None
-                crs = None
-                for t in header:
-                    if t.lower() in ("longitude", "lon", "long", "lng"):
-                        lng = t
-                    if t.lower() in ("latitude", "lat"):
-                        lat = t
-                    if t.lower() in ("crs", "srs", "coordinate reference systems", "reference systems", "spatial reference system"):
-                        crs = t
-                return (lng, lat, crs)
 
-            lng, lat, crs = getLatLonCrs(header)
+            lng, lat, crs = getLonLatCrs(header)
 
             # if there is no valid name or coordinates, an exception is thrown an cought with an errormassage
             if(lat is None or lng is None):
@@ -413,6 +403,24 @@ def CRSTransform(Lat, Long, refsys):
     point = ogr.CreateGeometryFromWkt("POINT (%s %s)" % (Long, Lat))
     point.Transform(transform)
     return [point.GetX(), point.GetY()]
+
+
+def getLonLatCrs(searchList):
+    """get the correct names of the columns holding the coordinates
+    @param header Header of the CSV
+    @returns (lon, lat, crs) where lon, lat, crs are the column names
+    """
+    lng = None
+    lat = None
+    crs = None
+    for t in searchList:
+        if t.lower() in ("longitude", "lon", "long", "lng"):
+            lng = t
+        if t.lower() in ("latitude", "lat"):
+            lat = t
+        if t.lower() in ("crs", "srs", "coordinate reference systems", "reference systems", "spatial reference system"):
+            crs = t
+    return (lng, lat, crs)
 
 
 # Main method

@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block content %}
+<div id="overlay"></div>
+<div class="center">
+    <h1>Find your records on the map!</h1>
+    <h3>Click button below to show all metadata within your current map section!</h3>
+
+    <button id="bounds" class="button">Get Geodata in viewport</button>
+    <button id="toTop" class="button navi"><i class="fas fa-arrow-up" style='font-size:36px'></i></button>
+    <button id="toBottom" class="button navi"><i class="fas fa-arrow-down" style='font-size:36px'></i></button>
+</div>
+<div id="map"></div>
+<div id="resultDiv" style="display:none; overflow-x:auto; overflow-y:auto">
+    <table id="resultTable"></table>
+</div>
+
+{% endblock %}

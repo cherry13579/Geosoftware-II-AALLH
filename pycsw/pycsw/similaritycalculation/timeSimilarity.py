@@ -1,9 +1,6 @@
 from math import floor
 
 from DateTime import DateTime
-import logging 
-
-#LOGGER = logging.get#LOGGER(__name__)
 
 def timeLength(timeA, timeB):
     startA = DateTime(timeA[0])
@@ -19,31 +16,26 @@ def timeLength(timeA, timeB):
     lengthB = endB - startB
 
     if lengthA == lengthB:
-        #LOGGER.info('Result time length with timeA '+ timeA +' and timeB '+ timeB +': 100.')
-        return 100
+        return 1
     else:
         if lengthA > lengthB:
             lengthPercentage = lengthB/lengthA
-            lengthPercentage = floor(lengthPercentage/100)*100
-            #LOGGER.info('Result time length with timeA '+ timeA +' and timeB '+ timeB +':' + lengthPercentage +'.')
+            lengthPercentage = floor(lengthPercentage*100)/100
             return lengthPercentage
         else:
             lengthPercentage = lengthA/lengthB
-            lengthPercentage = floor(lengthPercentage/100)*100
-            #LOGGER.info('Result time length with timeA '+ timeA +' and timeB '+ timeB +':' + lengthPercentage +'.')
+            lengthPercentage = floor(lengthPercentage*100)/100
             return lengthPercentage
 
 def timeOverlap(timeA, timeB):
     if DateTime(timeA[0]) == DateTime(timeB[0]) and DateTime(timeA[1]) == DateTime(timeB[1]):
         # timeA and timeB are equal
-        #LOGGER.info('Result time overlap with timeA '+ timeA +' and timeB '+ timeB +': 100.')
-        return 100
+        return 1
 
     # start A below start B
     if DateTime(timeA[0]) <= DateTime(timeB[0]):
         if DateTime(timeA[1]) <= DateTime(timeB[0]):
             # no overlap, because end A below or on start B
-            #LOGGER.info('Result time overlap with timeA '+ timeA +' and timeB '+ timeB +': 0.')
             return 0
         else: # overlap
             overlap = DateTime(timeA[1]) - DateTime(timeB[0])
@@ -51,7 +43,6 @@ def timeOverlap(timeA, timeB):
     else: # start B below start A
         if DateTime(timeB[1]) <= DateTime(timeA[0]):
             # no overlap, because end B below or on start A
-            #LOGGER.info('Result time overlap with timeA '+ timeA +' and timeB '+ timeB +': 0.')
             return 0
         else: # overlap
             overlap = DateTime(timeB[1]) - DateTime(timeA[0])
@@ -68,27 +59,26 @@ def timeOverlap(timeA, timeB):
     if timeLengthA > timeLengthB:
         overlapPercentage = overlap/timeLengthA
         overlapPercentage = floor(overlapPercentage*100)/100
-        #LOGGER.info('Result time length with timeA '+ timeA +' and timeB '+ timeB +':' + overlapPercentage +'.')
         return overlapPercentage
     else:
         overlapPercentage = overlap/timeLengthB
         overlapPercentage = floor(overlapPercentage*100)/100
-        #LOGGER.info('Result time length with timeA '+ timeA +' and timeB '+ timeB +':' + overlapPercentage +'.')
         return overlapPercentage
 
-# def similarInterval(timeA, timeB):
-#     if timeA[2] == timeB[2]:
-#         return 100
-#     else:
-#         if timeA[2] > timeB[2]:
-#             intervalPercentage = timeB[2]/timeA[2]
-#             intervalPercentage = floor(intervalPercentage*100)/100
-#             return intervalPercentage
-#         else:
-#             intervalPercentage = timeA[2]/timeB[2]
-#             intervalPercentage = floor(intervalPercentage*100)/100
-#             return intervalPercentage
+def similarInterval(timeA, timeB):
+    if timeA[2] == timeB[2]:
+        return 1
+    else:
+        if timeA[2] > timeB[2]:
+            intervalPercentage = timeB[2]/timeA[2]
+            intervalPercentage = floor(intervalPercentage*100)/100
+            return intervalPercentage
+        else:
+            intervalPercentage = timeA[2]/timeB[2]
+            intervalPercentage = floor(intervalPercentage*100)/100
+            return intervalPercentage
 
 # print(timeOverlap(['1935/01/01 00:00:00 GMT+0', '2014/01/01 00:00:00 GMT+0', 365.253164556962], ['2013/01/01 00:00:00 GMT+0', '2018/03/28 12:43:14.034000 GMT+0', 0]))
 
 # print(DateTime('1935/01/01 00:00:10 GMT+0') - DateTime('1935/01/01 00:00:00 GMT+0'))
+print(timeLength(['1956/01/01 00:00:00 GMT+0', '2088/01/01 00:00:00 GMT+0', 730.5], ['1957/01/01 00:00:00 GMT+0', '2088/01/01 00:00:00 GMT+0', 123]))
