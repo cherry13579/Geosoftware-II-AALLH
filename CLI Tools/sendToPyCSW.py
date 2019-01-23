@@ -113,6 +113,7 @@ def main(path, name, ident):
     
 
     xml = builtXML(spatialExtent, start, end, ident, file_extension)
+    print(xml)
     r = requests.post('http://localhost:8000/csw', data=xml)
     click.echo(r.content)
 
