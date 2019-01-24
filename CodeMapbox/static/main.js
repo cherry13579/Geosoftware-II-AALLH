@@ -57,7 +57,12 @@ function sendToFlask(bbox) {
         },
         url: "/getCoordinates",
         success: function (data) {
-            map.removeLayer('main');
+            try {
+                map.removeLayer('main');
+                map.removeSource('bbox');
+            } catch (error) {
+                console.log("")
+            }
             table = JSON.parse(data).table;
             bboxen = JSON.parse(data).bboxen;
             if (bboxen != null) {
