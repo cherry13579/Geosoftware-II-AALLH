@@ -9,6 +9,7 @@ from osgeo import gdal, ogr, osr
 
 def spatialOverlap(bboxA, bboxB):
     # get Boundingboxes as Geometries
+    print(bboxA, bboxB)
     boxA = _generateGeometryFromBbox(bboxA)
     boxB = _generateGeometryFromBbox(bboxB)
 
@@ -111,6 +112,7 @@ def spatialDistance(bboxA, bboxB):
 
 
 def _generateGeometryFromBbox(bbox):
+    gdal.UseExceptions()
     source = osr.SpatialReference()
     source.ImportFromEPSG(4326)
 
@@ -140,9 +142,9 @@ def _generateGeometryFromBbox(bbox):
             ]
         }""" % ({'minX':bbox[0], 'minY':bbox[1], 'maxX':bbox[2], 'maxY':bbox[3]}))
 
-
+    # print(target.ExportToPrettyWkt())
     transform = osr.CoordinateTransformation(source, target)
-    boxA.Transform(transform)
+    # boxA.Transform(transform)
     return boxA
 
 def _getDistance(startingpoint, endpoint):
