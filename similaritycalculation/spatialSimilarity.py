@@ -29,6 +29,7 @@ def spatialOverlap(bboxA, bboxB):
     largerArea = areaA if areaA >= areaB else areaB
 
     intersection = boxA.Intersection(boxB)
+    # print(intersection.ExportToWkt())
     intersectGeometry = ogr.CreateGeometryFromWkt(intersection.ExportToWkt())
 
     intersectArea = intersectGeometry.GetArea()
@@ -194,7 +195,7 @@ def _getMidPoint(bbox):
 ###############################################################################       
 
 
-# # Geometry
+# Geometry
 # print("\n Geometry \n")
 # bbox1 = [13.0078125, 50.62507306341435, 5.44921875, 45.82879925192134]
 # bbox2 = [17.7978515625, 52.09300763963822, 7.27294921875, 46.14939437647686]
@@ -243,13 +244,13 @@ def _getMidPoint(bbox):
 # print(spatialOverlap(bbox1, bbox2))
 # print(similarArea(bbox1, bbox2))
 
-# # Weit entfernte Boundingboxen 
-# print("\n Not so related Bounding Box \n")
-# bbox1 = [7.596703,51.950402,7.656441,51.978536]
-# bbox2 = [-96.800194,32.760085,-96.796353,32.761385]
-# print(spatialDistance(bbox1, bbox2))
-# print(spatialOverlap(bbox1, bbox2))
-# print(similarArea(bbox1, bbox2))
+# Weit entfernte Boundingboxen 
+print("\n Not so related Bounding Box \n")
+bbox1 = [7.596703,51.950402,7.656441,51.978536]
+bbox2 = [-96.800194,32.760085,-96.796353,32.761385]
+print(spatialDistance(bbox1, bbox2))
+print(spatialOverlap(bbox1, bbox2))
+print(similarArea(bbox1, bbox2))
 
 # Geometry
 

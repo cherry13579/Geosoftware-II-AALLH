@@ -57,8 +57,18 @@ function sendToFlask(bbox) {
         },
         url: "/getCoordinates",
         success: function (data) {
-            table = JSON.parse(data).table
-            // console.log(table)
+            try {
+                map.removeLayer('main');
+                map.removeSource('bbox');
+            } catch (error) {
+                console.log("")
+            }
+            table = JSON.parse(data).table;
+            bboxen = JSON.parse(data).bboxen;
+            if (bboxen != null) {
+                displayBboxen(bboxen);
+            }
+
             $("#resultTable").html(table);
             $("#resultDiv").show();
 
@@ -72,12 +82,12 @@ function sendToFlask(bbox) {
     });
 }
 
-$( document ).ajaxStart(function() {
-    $( "#overlay" ).show();
+$(document).ajaxStart(function () {
+    $("#overlay").show();
 });
 
-$( document ).ajaxStop(function() {
-    $( "#overlay" ).hide();
+$(document).ajaxStop(function () {
+    $("#overlay").hide();
 });
 
 $(document).ready(function () {
@@ -95,3 +105,41 @@ $(document).ready(function () {
         }, 1000);
     });
 });
+
+
+function displayBboxen(listOfJsonBboxes) {
+    listOfJsonBboxes.forEach(element => {
+        let geoJson = {
+            "type" : "FeatureCollection",
+            "features" : [element]
+        }
+
+        console.log(geoJson)
+
+        map.addSource("bbox", {
+            type: "geojson",
+            data: geoJson,
+        })
+
+        map.addLayer({
+            id: 'main',
+            type: 'fill',
+            source: 'bbox',
+            layout: {},
+            paint: {
+                'fill-color': getRandomColor(),
+                'fill-opacity': 0.3
+            }
+        })
+
+    });
+}
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }

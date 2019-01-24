@@ -25,7 +25,7 @@ import ogr2ogr
 # asking for parameters in command line
 
 
-@@click.command()
+@click.command()
 @click.option('--path', prompt="File path", help='Path to file')
 @click.option('--name', prompt="File name", help="Filename with extension")
 @click.option('--clear', '-c', default=False, is_flag=True, help='Clear screen before showing results')

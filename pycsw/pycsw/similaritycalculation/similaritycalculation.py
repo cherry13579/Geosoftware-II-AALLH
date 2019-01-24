@@ -119,10 +119,10 @@ def similaritycalculation(id1, bbox, timebegin1, timeend1, format1):
                 
                 # general similarity (same dataformat, same author, similar title)
                 sameDatatype = gs.sameDatatype(format1, format2) 
-                similarAuthor = gs.similarAuthor(creator1, creator2) 
+                sameAuthor = gs.sameAuthor(creator1, creator2) 
                 similarTitle = gs.similarTitle(title1, title2) 
 
-                generalSimilarity = sameDatatype + similarAuthor + similarTitle 
+                generalSimilarity = sameDatatype + sameAuthor + similarTitle 
                 #LOGGER.info('General similarity for format1 '+ format1 +' and format2 '+ format2 +': '+ generalSimilarity + '.')
 
                 # spatial simialrity (overlapping bboxes, similar area of the bboxes, spatial distance)
