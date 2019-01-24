@@ -76,13 +76,10 @@ def wkt2json(wktGeometryList):
 
     def toJson(data):
         return {
-            "type" : "Feature",
-            "geometry" : {
-                "type" : "Polygon",
-                "properties" : {
-                    "ID" : data[1]
-                },
-                "coordinates" : [
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
                     [
                         [data[0][0], data[0][1]],
                         [data[0][0], data[0][3]],
@@ -91,11 +88,15 @@ def wkt2json(wktGeometryList):
                         [data[0][0], data[0][1]]
                     ]
                 ]
-            }
+            },
+            "properties": {
+                "ID": "<b>ID: %s</b>" % data[1],
+                "color": None
+            },
         }
 
     jsonBboxes = list(map(toJson, listOfBboxesList))
-    
+
     return jsonBboxes
 
 
