@@ -14,10 +14,6 @@ def similaritycalculation(id1):
     Runs the functions for the similarity calculations.
     @authors Anika Graupner, Henry Fock
     :param id1: Identifier of the udated or inserted record
-    :param bbox: Bbox of the updated or inserted record 
-    :param timebegin1: timebegin of the updated or inserted record
-    :param timeend1: timeend of the updated or inserted record
-    :param format1: fileformat of the updated or inserted record
     ''' 
 
     LOGGER.info('Similaritycalculation started.')
@@ -93,17 +89,17 @@ def similaritycalculation(id1):
             while i < len(values):
                 
                 if values[i][0] == id1:
-                    print('gleiche id')
+                    
                     i+=1
 
                 # no similarity calculation with records from the database which have no time extend and no spatial extend 
                 if values[i][2] and values[i][5] is None:
-                    print('beides nicht')
+                    
                     i+=1
                 
                 # start comparing the updated or inserted record with all valid records in the database
                 else:
-                    print('ich rechne')
+                    
                     # id of the respective record in the database
                     id2 = values[i][0]
                     
@@ -130,29 +126,25 @@ def similaritycalculation(id1):
 
                     # test if both records have a timeextent
                     if values[i][2] and timebegin1:
-                        print('timeextent')
+                        
                         # formatting the input for the functions of the timeSimilarity
                         timeB = [values[i][2], values[i][3]]
-                        print(timeB)
-                        print(timeA)
 
                         # temporal similarity (time length, overlapping of the time periods)
                         timeLength = ts.timeLength(timeA, timeB)*weight["time"]["length"]
                         timeOverlap = ts.timeOverlap(timeA, timeB)*weight["time"]["overlap"] 
 
                         timeSimilarity = timeLength + timeOverlap
-                        print(timeSimilarity)
+                       
                     
                     # if not it is not necessary to run the functions for the time similarity and the timeSimilarity is 0
                     else:
-                        print('kein timeextent')
+                        
                         timeSimilarity = 0 
 
-                    print(bbox)
-                    print(values[i][5])
                     # test if both records have a spatial extent
                     if bbox and values[i][5]:
-                        print('bbox')
+
                         # formatting bbox of the repective record in the database 
                         box = values[i][5]
                         e = box.replace("POLYGON", "")
@@ -174,7 +166,6 @@ def similaritycalculation(id1):
 
                     # if not it is not necessary to run the functions for the spatial similarity and the spatialSimilarity is 0
                     else:
-                        print('keine bbox')
                         spatialSimilarity = 0
                     
                     # test if both records have a title
@@ -212,20 +203,17 @@ def similaritycalculation(id1):
 
                     # calculate the general similarity 
                     generalSimilarity = sameDatatype + sameAuthor + similarTitle
-
-                    print(generalSimilarity)
                     
                     # add everything together for the total similarity value
                     # /100 because we want to have values between 0 and 1
                     totalSimilarity = (generalSimilarity + spatialSimilarity + timeSimilarity)/100
 
-                    print(totalSimilarity)
-
                     # new tupel add to rows list (later inserted in the database table similarities)
-                    newrow = (id1, id2, totalSimilarity, floor(spatialSimilarity/weight["space"]["isg"]*100)/100, 
+                    newrow = (id1, id2, round(totalSimilarity, 4), floor(spatialSimilarity/weight["space"]["isg"]*100)/100, 
                         floor(timeSimilarity/weight["time"]["isg"]*100)/100, floor(generalSimilarity/weight["general"]["isg"]*100)/100)
 
                     rows.append(newrow)
+                    LOGGER.debug(newrow)
 
                     i+=1
 
@@ -233,7 +221,6 @@ def similaritycalculation(id1):
 
             # insert the calculated values into the database 
             for entry in rows:
-                print('bis hier')
                 sql = """insert into similarities (record1, record2, total_similarity, geospatial_extent, temporal_extent, general_extent) 
                         values (?,?,?,?,?,?)"""
 

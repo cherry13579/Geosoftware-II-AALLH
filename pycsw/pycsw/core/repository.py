@@ -51,6 +51,9 @@ from pycsw.core.etree import PARSER
 # import a²hl² similarity calculation 
 from pycsw.similaritycalculation import similaritycalculation
 
+# import a²hl² delete similarities
+from pycsw.similaritycalculation import deletesimilarities
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -409,6 +412,13 @@ class Repository(object):
                     synchronize_session='fetch')
 
             self.session.commit()
+
+            # @author: Anika Graupner 
+            # delete also the records for the deleted record in the similarities table
+            sentid = constraint['values'][0]
+            LOGGER.info('Start the deleteSimilarities function from repository.py def delete.')
+            deletesimilarities.deleteSimilarities(sentid)
+
         except Exception as err:
             self.session.rollback()
             msg = 'Cannot commit to repository'
