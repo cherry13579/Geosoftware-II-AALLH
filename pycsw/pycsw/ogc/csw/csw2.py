@@ -510,22 +510,20 @@ class Csw2(object):
                 # sql request to the similarities table 
                 # searching for the ids and the value of the similarity for the current id 
                 # the values are ordered in descending order
-                # we set the maximum value to 20 similar records (when no similar parameter is given in the request), but only records with a similarity value of at least 0.51 are displayed
+                # we set the maximum value to 20 similar records (when no similar parameter is given in the request)
                 c.execute("""SELECT record1, total_similarity 
                             FROM similarities 
-                            WHERE record2 = %(requestID)r 
-                                AND total_similarity >= 0.51 
+                            WHERE record2 = %(requestID)r  
                             UNION 
                                 SELECT record2, total_similarity 
                                 FROM similarities 
-                                WHERE record1 = %(requestID)r 
-                                    AND total_similarity >= 0.51 
+                                WHERE record1 = %(requestID)r  
                             ORDER BY total_similarity DESC LIMIT 20""" % ({'requestID' : requestID}))
             
                 # get the result of the request 
                 values = c.fetchall()
 
-                # response if there are no similar records for the given id (can happen if the values of the total similarities are always below 0.51)
+                # response if there are no similar records for the given id
                 if not values:
 
                     LOGGER.info('No similar records.')
@@ -613,12 +611,10 @@ class Csw2(object):
                 c.execute("""SELECT record1, total_similarity 
                              FROM similarities 
                              WHERE record2 = %(requestID)r 
-                                AND total_similarity >= 0.51 
                             UNION 
                                 SELECT record2, total_similarity 
                                 FROM similarities 
-                                WHERE record1 = %(requestID)r 
-                                    AND total_similarity >= 0.51 
+                                WHERE record1 = %(requestID)r  
                             ORDER BY total_similarity DESC LIMIT %(requestSimilar)r""" % ({'requestID' : requestID, 'requestSimilar' : requestSimilar}))
             
                 # get the result of the request 
@@ -660,7 +656,6 @@ class Csw2(object):
                 k +=1
 
             return node
-    
     
     def getsimilaritybbox(self, raw=False):
         '''
@@ -1497,7 +1492,6 @@ class Csw2(object):
         LOGGER.debug('Transaction list: %s', self.parent.kvp['transactions'])
 
         for ttype in self.parent.kvp['transactions']:
-            print(ttype)
             if ttype['type'] == 'insert':
                 try:
                     record = metadata.parse_record(self.parent.context,
@@ -1526,6 +1520,7 @@ class Csw2(object):
                     self.parent.context.md_core_model['mappings']['pycsw:Identifier']),
                     'title': getattr(record,
                     self.parent.context.md_core_model['mappings']['pycsw:Title'])})
+
                 except Exception as err:
                     return self.exceptionreport('NoApplicableCode',
                     'insert', 'Transaction (insert) failed: %s.' % str(err))
@@ -1578,26 +1573,6 @@ class Csw2(object):
                         else:
                             rp['rp']= \
                             self.parent.repository.queryables['_all'][rp['name']]
-
-                    # import the similaritycalculation
-                    # @author: Anika Graupner 
-                    from pycsw.similaritycalculation import similaritycalculation
-
-                    # get the id of the record which was sendet to the server from the cli tool to start the similarity calculation 
-                    # print(ttype['constraint']['values'])
-                    sentid = ttype['constraint']['values']
-                    sentid = sentid[0]
-                    #print(values)
-                    sentbbox = ttype['recordproperty'][1]['value']
-                    sentbegin = ttype['recordproperty'][2]['value']
-                    sentend = ttype['recordproperty'][3]['value']
-                    sentformat = ttype['recordproperty'][4]['value']
-
-                    # no similaritycalculation if there is no calculated timeextent and no boundingbox 
-                    if sentbbox is not None or sentbegin is not None:
-                        # start the calculation
-                        similaritycalculation.similaritycalculation(sentid, sentbbox, sentbegin, sentend, sentformat)
-                        LOGGER.info('Starting similarity calculation from csw2.py.')
 
                     LOGGER.debug('Record Properties: %s.', ttype['recordproperty'])
                     try:
@@ -1978,7 +1953,6 @@ class Csw2(object):
         ''' Parse POST XML '''
 
         request = {}
-        print(postdata)
         try:
             LOGGER.info('Parsing %s', postdata)
             doc = etree.fromstring(postdata, self.parent.context.parser)

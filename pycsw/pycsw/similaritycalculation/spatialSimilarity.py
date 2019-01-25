@@ -1,4 +1,5 @@
 from math import *
+import logging
 
 # add local modules folder
 # file_path = os.path.join('..', 'Python_Modules')
@@ -6,6 +7,8 @@ from math import *
 
 from osgeo import gdal, ogr, osr
 # from subprocess import Popen, PIPE
+
+LOGGER = logging.getLogger(__name__)
 
 def spatialOverlap(bboxA, bboxB):
     # get Boundingboxes as Geometries
@@ -25,15 +28,18 @@ def spatialOverlap(bboxA, bboxB):
         boxB = boxB.Buffer(bufferDist)
         areaB = boxB.GetArea() 
 
-
     largerArea = areaA if areaA >= areaB else areaB
 
-    intersection = boxA.Intersection(boxB)
+    print(boxA)
+    print(boxB)
+
+    intersection = boxA.Union(boxB)
     intersectGeometry = ogr.CreateGeometryFromWkt(intersection.ExportToWkt())
 
     intersectArea = intersectGeometry.GetArea()
 
-    # print(intersectArea)
+    print(intersectArea)
+
 
     reachedPercentArea = intersectArea/largerArea
 
@@ -141,8 +147,8 @@ def _generateGeometryFromBbox(bbox):
         }""" % ({'minX':bbox[0], 'minY':bbox[1], 'maxX':bbox[2], 'maxY':bbox[3]}))
 
 
-    transform = osr.CoordinateTransformation(source, target)
-    boxA.Transform(transform)
+    # transform = osr.CoordinateTransformation(source, target)
+    # boxA.Transform(transform)
     return boxA
 
 def _getDistance(startingpoint, endpoint):

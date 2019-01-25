@@ -570,16 +570,14 @@ class Csw3(object):
                 # sql request to the similarities table 
                 # searching for the ids and the value of the similarity for the current id 
                 # the values are ordered in descending order
-                # we set the maximum value to 20 similar records (when no similar parameter is given in the request), but only records with a similarity value of at least 0.51 are displayed
+                # we set the maximum value to 20 similar records (when no similar parameter is given in the request)
                 c.execute("""SELECT record1, total_similarity 
                             FROM similarities 
                             WHERE record2 = %(requestID)r 
-                                AND total_similarity >= 0.51 
                             UNION 
                                 SELECT record2, total_similarity 
                                 FROM similarities 
-                                WHERE record1 = %(requestID)r 
-                                    AND total_similarity >= 0.51 
+                                WHERE record1 = %(requestID)r  
                             ORDER BY total_similarity DESC LIMIT 20""" % ({'requestID' : requestID}))
 
 
@@ -673,13 +671,11 @@ class Csw3(object):
                 # the number of the records in the list of the respoinse depends on the similar parameter
                 c.execute("""SELECT record1, total_similarity 
                             FROM similarities 
-                            WHERE record2 = %(requestID)r 
-                            AND total_similarity >= 0.51 
+                            WHERE record2 = %(requestID)r  
                         UNION 
                             SELECT record2, total_similarity 
                             FROM similarities 
                             WHERE record1 = %(requestID)r 
-                                AND total_similarity >= 0.51 
                         ORDER BY total_similarity DESC LIMIT %(requestSimilar)r""" % ({'requestID' : requestID, 'requestSimilar' : requestSimilar}))
 
                 # get the result of the request 
