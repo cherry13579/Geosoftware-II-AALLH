@@ -417,6 +417,7 @@ class Repository(object):
             # delete also the records for the deleted record in the similarities table
             sentid = constraint['values'][0]
             LOGGER.info('Start the deleteSimilarities function from repository.py def delete.')
+            print(sentid)
             deletesimilarities.deleteSimilarities(sentid)
 
         except Exception as err:

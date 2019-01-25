@@ -11,7 +11,7 @@ def deleteSimilarities(id):
     @author: Anika Graupner 
     :param id: id of the deleted record in the delete transaction 
     '''
-    
+
     LOGGER.info('DeleteSimilarities is running for the record with the id %r' % (id))
 
     # connection to the database 
@@ -19,7 +19,22 @@ def deleteSimilarities(id):
     LOGGER.debug(conn)
     c = conn.cursor()
 
-    # delete all records in the similarities table where record1 or record2 is like the input id 
-    c.execute("DELETE FROM similarities WHERE record1 = %(id)r OR record2 = %(id)r" % ({'id' : id}))
-    conn.commit()
-    LOGGER.info('Deleting records from similarities tables where record1 or record2 is %r!' % (id))
+    # if a user does a delete all transaction 
+    if str(id) is '%':
+
+        c.execute("DELETE FROM similarities")
+        conn.commit()
+        LOGGER.info("Deleting all records from similarities table.")
+
+    c.execute("SELECT record1, record2 FROM similarities WHERE record1 = %(id)r OR record2 = %(id)r" % ({'id' : id}))
+    values = c.fetchall()
+
+    if values:
+
+        # delete all records in the similarities table where record1 or record2 is like the input id 
+        c.execute("DELETE FROM similarities WHERE record1 = %(id)r OR record2 = %(id)r" % ({'id' : id}))
+        conn.commit()
+        LOGGER.info('Deleting records from similarities tables where record1 or record2 is %r!' % (id))
+    
+    else:
+        LOGGER.info('Nothing to delete.')
