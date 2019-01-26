@@ -513,11 +513,13 @@ class Csw2(object):
                 # we set the maximum value to 20 similar records (when no similar parameter is given in the request)
                 c.execute("""SELECT record1, total_similarity 
                             FROM similarities 
-                            WHERE record2 = %(requestID)r  
+                            WHERE record2 = %(requestID)r
+                            AND total_similarity > 0  
                             UNION 
                                 SELECT record2, total_similarity 
                                 FROM similarities 
                                 WHERE record1 = %(requestID)r  
+                                AND total_similarity > 0
                             ORDER BY total_similarity DESC LIMIT 20""" % ({'requestID' : requestID}))
             
                 # get the result of the request 
@@ -611,10 +613,12 @@ class Csw2(object):
                 c.execute("""SELECT record1, total_similarity 
                              FROM similarities 
                              WHERE record2 = %(requestID)r 
+                             AND total_similarity > 0
                             UNION 
                                 SELECT record2, total_similarity 
                                 FROM similarities 
                                 WHERE record1 = %(requestID)r  
+                                AND total_similarity > 0
                             ORDER BY total_similarity DESC LIMIT %(requestSimilar)r""" % ({'requestID' : requestID, 'requestSimilar' : requestSimilar}))
             
                 # get the result of the request 

@@ -574,10 +574,12 @@ class Csw3(object):
                 c.execute("""SELECT record1, total_similarity 
                             FROM similarities 
                             WHERE record2 = %(requestID)r 
+                            AND total_similarity > 0
                             UNION 
                                 SELECT record2, total_similarity 
                                 FROM similarities 
                                 WHERE record1 = %(requestID)r  
+                                AND total_similarity > 0
                             ORDER BY total_similarity DESC LIMIT 20""" % ({'requestID' : requestID}))
 
 
@@ -672,10 +674,12 @@ class Csw3(object):
                 c.execute("""SELECT record1, total_similarity 
                             FROM similarities 
                             WHERE record2 = %(requestID)r  
+                            AND total_similarity > 0
                         UNION 
                             SELECT record2, total_similarity 
                             FROM similarities 
                             WHERE record1 = %(requestID)r 
+                            AND total_similarity > 0
                         ORDER BY total_similarity DESC LIMIT %(requestSimilar)r""" % ({'requestID' : requestID, 'requestSimilar' : requestSimilar}))
 
                 # get the result of the request 
