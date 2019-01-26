@@ -306,9 +306,11 @@ class Repository(object):
             self.session.add(record)
             self.session.commit()
 
+            # @author: Anika Graupner
             # start similarity calculation for the inserted record 
             sentid = getattr(record,
             self.context.md_core_model['mappings']['pycsw:Identifier'])
+            LOGGER.info('Start similaritycalculation for the inserted record %r' % (sentid))
             similaritycalculation.similaritycalculation(sentid)
 
         except Exception as err:
@@ -338,8 +340,10 @@ class Repository(object):
                 identifier=identifier).update(update_dict, synchronize_session='fetch')
                 self.session.commit()
 
+                # @author: Anika Graupner
                 # start similarity calculation for the updated record (update full)
                 sentid = identifier
+                LOGGER.info('Start similaritycalculation for the full updated record %r' % (sentid))
                 similaritycalculation.similaritycalculation(sentid)
 
             except Exception as err:
@@ -377,8 +381,10 @@ class Repository(object):
                         }, synchronize_session='fetch')
                 self.session.commit()
                 
+                # @author: Anika Graupner
                 # start similarity calculation for the updated record (update record property)
                 sentid = constraint['values'][0]
+                LOGGER.info('Start similaritycalculation for the based on record property updated record %r' % (sentid))
                 similaritycalculation.similaritycalculation(sentid)
 
                 return rows
