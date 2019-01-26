@@ -761,11 +761,17 @@ class Csw3(object):
         if self.parent.requesttype == 'GET':
            self.parent.kvp['idtwo'] = self.parent.kvp['idtwo'].split(',')
 
+        # when idone = idtwo
+        if self.parent.kvp['idone'] == self.parent.kvp['idtwo']:
+            LOGGER.exception('Invalid inputids. Do not be equal.')
+            return self.exceptionreport('InvalidParameterValue', 'idone',
+            'Invalid inputids. Do not be equal.')
+
         # when there is no value behind the idone paramter, only "&idone="
         if len(self.parent.kvp['idone']) < 1:
             LOGGER.exception('Invalid idone parameter')
             return self.exceptionreport('InvalidParameterValue', 'idone',
-            'Invalid idone parameter')
+            'Invalid idone parameter.')
         
         # when there is more than one value behind the idone paramter (first .split(,))
         if len(self.parent.kvp['idone']) > 1:
@@ -777,7 +783,7 @@ class Csw3(object):
         if len(self.parent.kvp['idtwo']) < 1:
             LOGGER.exception('Invalid idtwo parameter.')
             return self.exceptionreport('InvalidParameterValue', 'idtwo',
-            'Invalid idtwo parameter')
+            'Invalid idtwo parameter.')
         
         # when there is more than one value behind the idtwo paramter
         if len(self.parent.kvp['idtwo']) > 1:
@@ -838,15 +844,51 @@ class Csw3(object):
         # get the request result 
         values = c.fetchall()
 
-        # if there is no similarity value of the two input ids of the bbox 
-        if not values:
+        # if the total_similarity is 0, check if there are no bboxes saved for the records
+        if values[0][0] == 0:
 
-            LOGGER.info('No simialr value for the bbox of the two input ids.')
+            c.execute("SELECT wkt_geometry FROM records WHERE identifier = %r" % (id1))
+            bboxid1 = c.fetchall()
 
-            # add the value of the bbox to the response 
-            etree.SubElement(node, 'inputid1').text = self.parent.kvp['idone'][0]
-            etree.SubElement(node, 'inputid2').text = self.parent.kvp['idtwo'][0]
-            etree.SubElement(node, 'similarityValueOfTheBBox').text = 'No similarity value.'
+            c.execute("SELECT wkt_geometry FROM records WHERE identifier = %r" % (id2))
+            bboxid2 = c.fetchall()
+
+            if bboxid1[0][0] is None and bboxid2[0][0] is None:
+
+                LOGGER.info('No bounding boxen are stored for both input records.')
+
+                # add the value of the bbox to the response 
+                etree.SubElement(node, 'inputid1').text = self.parent.kvp['idone'][0]
+                etree.SubElement(node, 'inputid2').text = self.parent.kvp['idtwo'][0]
+                etree.SubElement(node, 'info').text = 'No bounding boxen are stored for both input records.'
+
+            elif bboxid2[0][0] is None:
+
+                LOGGER.info('No bounding box is stored for the record with the id %s.' % id2)
+
+                # add the value of the bbox to the response 
+                etree.SubElement(node, 'inputid1').text = self.parent.kvp['idone'][0]
+                etree.SubElement(node, 'inputid2').text = self.parent.kvp['idtwo'][0]
+                etree.SubElement(node, 'info').text = 'No bounding box is stored for the record with the id %s.' % id2
+            
+            elif bboxid1[0][0] is None:
+
+                LOGGER.info('No bounding box is stored for the record with the id %s.' % id1)
+
+                # add the value of the bbox to the response 
+                etree.SubElement(node, 'inputid1').text = self.parent.kvp['idone'][0]
+                etree.SubElement(node, 'inputid2').text = self.parent.kvp['idtwo'][0]
+                etree.SubElement(node, 'info').text = 'No bounding box is stored for the record with the id %s.' % id1
+            
+            else:
+
+                # get the value out of the list (0 because it can only be one value)
+                value = str(values[0][0])
+
+                # add the value of the bbox to the response 
+                etree.SubElement(node, 'inputid1').text = self.parent.kvp['idone'][0]
+                etree.SubElement(node, 'inputid2').text = self.parent.kvp['idtwo'][0]
+                etree.SubElement(node, 'similarityValueOfTheBBox').text = value
         
         else:
 
