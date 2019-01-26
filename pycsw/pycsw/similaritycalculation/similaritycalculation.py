@@ -26,27 +26,27 @@ def similaritycalculation(id1):
     # test if there is only one record in the database
     # if yes, the calculation will not run
     c.execute("SELECT identifier FROM records")
-    values = c.fetchall()
+    numberrec = c.fetchall()
     
-    if len(values) > 1:
+    if len(numberrec) > 1:
 
         # get the the important values of the updated or inserted record 
         c.execute("SELECT title, time_begin, time_end, creator, wkt_geometry, format FROM records WHERE identifier = %r" % (id1))
         LOGGER.info('Getting the the important values of the updated or inserted record')
-        values = c.fetchall()
+        valuesrec1 = c.fetchall()
  
         # no similaritycalculation if there is no calculated timeextent and no boundingbox 
-        if values[0][1] or values[0][4]:
+        if valuesrec1[0][1] or valuesrec1[0][4]:
 
-            title1 = values[0][0]
-            creator1 = values[0][3]
-            format1 = values[0][5]
-            bbox = values[0][4]
-            timebegin1 = values[0][1]
-            timeend1 = values[0][2]
+            title1 = valuesrec1[0][0]
+            creator1 = valuesrec1[0][3]
+            format1 = valuesrec1[0][5]
+            bbox = valuesrec1[0][4]
+            timebegin1 = valuesrec1[0][1]
+            timeend1 = valuesrec1[0][2]
 
             # formatting the bbox of the updated or inserted record if there is one 
-            if values[0][4]:
+            if valuesrec1[0][4]:
 
                 # formatting bbox and timeextent of the updated or inserted record
                 a = bbox.replace("POLYGON", "")
@@ -64,7 +64,7 @@ def similaritycalculation(id1):
                 LOGGER.info('The updated or inserted record %r has no bbox.' % (id1))
                             
             # formatting the timeextend of the updated or inserted record if there is one 
-            if values[0][1]:
+            if valuesrec1[0][1]:
 
                 timeA = [timebegin1, timeend1]
             
@@ -94,7 +94,7 @@ def similaritycalculation(id1):
                     i+=1
 
                 # no similarity calculation with records from the database which have no time extend and no spatial extend 
-                if values[i][2] and values[i][5] is None:
+                elif values[i][2] is None and values[i][5] is None:
                     
                     i+=1
                 
@@ -214,7 +214,7 @@ def similaritycalculation(id1):
                         round(timeSimilarity/weight["time"]["isg"], 4), round(generalSimilarity/weight["general"]["isg"], 4))
 
                     rows.append(newrow)
-                    print(rows)
+                    
                     LOGGER.debug(newrow)
                     
                     i+=1
