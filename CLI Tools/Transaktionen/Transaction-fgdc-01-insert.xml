@@ -3,7 +3,7 @@
 <csw:Insert>
 <metadata>
 <idinfo>
-<datasetid>foorecord</datasetid>
+<datasetid>2</datasetid>
 <citation>
 <citeinfo>
 <origin>NOAA/ESRL Physical Sciences Division</origin>
@@ -34,8 +34,8 @@ Entry_ID: ncep.fgdc
 <timeperd>
 <timeinfo>
 <rngdates>
-<begdate>19790101</begdate>
-<enddate>20001201</enddate>
+<begdate>1979-01-01</begdate>
+<enddate>2000-12-01</enddate>
 </rngdates>
 </timeinfo>
 <current>Publication_Date: 20001201</current>
@@ -46,10 +46,10 @@ Entry_ID: ncep.fgdc
 </status>
 <spdom>
 <bounding>
-<westbc>-180</westbc>
-<eastbc>180</eastbc>
-<northbc>90.00</northbc>
-<southbc>-90.00</southbc>
+<westbc>-160</westbc>
+<eastbc>160</eastbc>
+<northbc>60.00</northbc>
+<southbc>-60.00</southbc>
 </bounding>
 </spdom>
 <keywords>

@@ -1520,7 +1520,6 @@ class Csw2(object):
                     self.parent.context.md_core_model['mappings']['pycsw:Identifier']),
                     'title': getattr(record,
                     self.parent.context.md_core_model['mappings']['pycsw:Title'])})
-
                 except Exception as err:
                     return self.exceptionreport('NoApplicableCode',
                     'insert', 'Transaction (insert) failed: %s.' % str(err))

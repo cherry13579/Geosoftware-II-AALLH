@@ -27,6 +27,7 @@ def similaritycalculation(id1):
     # if yes, the calculation will not run
     c.execute("SELECT identifier FROM records")
     values = c.fetchall()
+    
     if len(values) > 1:
 
         # get the the important values of the updated or inserted record 
@@ -41,6 +42,8 @@ def similaritycalculation(id1):
             creator1 = values[0][3]
             format1 = values[0][5]
             bbox = values[0][4]
+            timebegin1 = values[0][1]
+            timeend1 = values[0][2]
 
             # formatting the bbox of the updated or inserted record if there is one 
             if values[0][4]:
@@ -63,8 +66,6 @@ def similaritycalculation(id1):
             # formatting the timeextend of the updated or inserted record if there is one 
             if values[0][1]:
 
-                timebegin1 = values[0][1]
-                timeend1 = values[0][2]
                 timeA = [timebegin1, timeend1]
             
             else:
@@ -82,7 +83,7 @@ def similaritycalculation(id1):
             c.execute("SELECT identifier, title, time_begin, time_end, creator, wkt_geometry, format FROM records")
             LOGGER.info('Getting important values from the database for similarity calculation except the values of the updated or inserted record')
             values = c.fetchall()
-
+            
             # for each record in the database (except the record with the id of the updated or inserted record)
             rows = []
             i = 0
@@ -144,7 +145,7 @@ def similaritycalculation(id1):
 
                     # test if both records have a spatial extent
                     if bbox and values[i][5]:
-
+                        
                         # formatting bbox of the repective record in the database 
                         box = values[i][5]
                         e = box.replace("POLYGON", "")
@@ -170,7 +171,7 @@ def similaritycalculation(id1):
                     
                     # test if both records have a title
                     if title1 and values[i][1]:
-
+                        
                         title2 = values[i][1]
                         similarTitle = gs.similarTitle(title1, title2)*weight["general"]["title"]
                     
@@ -187,7 +188,7 @@ def similaritycalculation(id1):
                     
                     # if not it is not necessary to run the functions for the same Author and sameAuthor is 0
                     else:
-
+                        
                         sameAuthor = 0
                     
                     # test if both records have a format
@@ -198,7 +199,7 @@ def similaritycalculation(id1):
 
                     # if not it is not necessary to run the functions for the same datatype and sameDatatype is 0
                     else:
-
+                        
                         sameDatatype = 0
 
                     # calculate the general similarity 
@@ -209,18 +210,18 @@ def similaritycalculation(id1):
                     totalSimilarity = (generalSimilarity + spatialSimilarity + timeSimilarity)/100
 
                     # new tupel add to rows list (later inserted in the database table similarities)
-                    newrow = (id1, id2, round(totalSimilarity, 4), floor(spatialSimilarity/weight["space"]["isg"]*100)/100, 
-                        floor(timeSimilarity/weight["time"]["isg"]*100)/100, floor(generalSimilarity/weight["general"]["isg"]*100)/100)
+                    newrow = (id1, id2, round(totalSimilarity, 4), round(spatialSimilarity/weight["space"]["isg"], 4), 
+                        round(timeSimilarity/weight["time"]["isg"], 4), round(generalSimilarity/weight["general"]["isg"], 4))
 
                     rows.append(newrow)
+                    print(rows)
                     LOGGER.debug(newrow)
-
+                    
                     i+=1
-
-            LOGGER.debug(rows)
-
+            
             # insert the calculated values into the database 
             for entry in rows:
+                
                 sql = """insert into similarities (record1, record2, total_similarity, geospatial_extent, temporal_extent, general_extent) 
                         values (?,?,?,?,?,?)"""
 
