@@ -424,7 +424,8 @@ class Repository(object):
             sentid = constraint['values'][0]
             LOGGER.info('Start the deleteSimilarities function from repository.py def delete.')
             print(sentid)
-            deletesimilarities.deleteSimilarities(sentid)
+            print(constraint)
+            deletesimilarities.deleteSimilarities(sentid, constraint)
 
         except Exception as err:
             self.session.rollback()

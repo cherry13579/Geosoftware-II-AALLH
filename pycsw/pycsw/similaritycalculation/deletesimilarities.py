@@ -4,7 +4,7 @@ import sqlite3
 
 LOGGER = logging.getLogger(__name__)
 
-def deleteSimilarities(id):
+def deleteSimilarities(id, constraint):
     '''
     Function which deletes the respective records in the similarities table 
     when a user runs a delete transaction
@@ -19,17 +19,17 @@ def deleteSimilarities(id):
     LOGGER.debug(conn)
     c = conn.cursor()
 
+    c.execute("SELECT record1, record2 FROM similarities WHERE record1 = %(id)r OR record2 = %(id)r" % ({'id' : id}))
+    values = c.fetchall()
+
     # if a user does a delete all transaction 
-    if str(id) is '%':
+    if str(id) is '%' and '@wildCard' in constraint['_dict']['ogc:Filter']['ogc:PropertyIsLike']:
 
         c.execute("DELETE FROM similarities")
         conn.commit()
         LOGGER.info("Deleting all records from similarities table.")
 
-    c.execute("SELECT record1, record2 FROM similarities WHERE record1 = %(id)r OR record2 = %(id)r" % ({'id' : id}))
-    values = c.fetchall()
-
-    if values:
+    elif values:
 
         # delete all records in the similarities table where record1 or record2 is like the input id 
         c.execute("DELETE FROM similarities WHERE record1 = %(id)r OR record2 = %(id)r" % ({'id' : id}))
