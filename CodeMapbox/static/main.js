@@ -32,19 +32,10 @@ map.addControl(new mapboxgl.GeolocateControl({
     trackUserLocation: true
 }));
 
-map.on('click', function (e) {
-    document.getElementById('info').innerHTML =
-        // e.point is the x, y coordinates of the mousemove event relative
-        // to the top-left corner of the map
-        JSON.stringify(e.point) + '<br />' +
-        // e.lngLat is the longitude, latitude geographical position of the event
-        JSON.stringify(map.getBounds());
-});
-
 $(document).ready(function () {
     $("#bounds").click(function () {
         $("#resultDiv").hide();
-        $("#info").text(JSON.stringify(map.getBounds()));
+        // $("#info").text(JSON.stringify(map.getBounds()));
         sendToFlask(JSON.stringify(map.getBounds()));
     });
 });
@@ -57,13 +48,23 @@ function sendToFlask(bbox) {
         },
         url: "/getCoordinates",
         success: function (data) {
-            table = JSON.parse(data).table
-            // console.log(table)
+            try {
+                map.removeLayer('main');
+                map.removeSource('main');
+            } catch (error) {
+                console.log("")
+            }
+            table = JSON.parse(data).table;
+            bboxen = JSON.parse(data).bboxen;
+            if (bboxen != null) {
+                displayBboxen(bboxen);
+            }
+
             $("#resultTable").html(table);
             $("#resultDiv").show();
 
             $([document.documentElement, document.body]).animate({
-                scrollTop: $("#resultTable").offset().top
+                scrollTop: $("#bounds").offset().top
             }, 1000);
         },
         error: function (xhr) {
@@ -72,12 +73,12 @@ function sendToFlask(bbox) {
     });
 }
 
-$( document ).ajaxStart(function() {
-    $( "#overlay" ).show();
+$(document).ajaxStart(function () {
+    $("#overlay").show();
 });
 
-$( document ).ajaxStop(function() {
-    $( "#overlay" ).hide();
+$(document).ajaxStop(function () {
+    $("#overlay").hide();
 });
 
 $(document).ready(function () {
@@ -95,3 +96,64 @@ $(document).ready(function () {
         }, 1000);
     });
 });
+
+
+function displayBboxen(listOfJsonBboxes) {
+    listOfJsonBboxes.forEach(element => {
+        element.properties.color = getRandomColor();
+    });
+
+    let geoJsonData = {
+        "type": "FeatureCollection",
+        "features": listOfJsonBboxes
+    }
+    console.log(geoJsonData);
+
+    map.addLayer({
+        id: 'main',
+        type: 'fill',
+        source: {
+            type: 'geojson',
+            data: geoJsonData,
+        },
+        layout: {},
+        paint: {
+            'fill-opacity': 0.4,
+            'fill-color': ["get", "color"],
+            'fill-outline-color': 'black',
+        }
+    });
+
+
+    var popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false
+    });
+
+    map.on('click', 'main', function (e) {
+        popup.remove();
+        popup.setLngLat(e.lngLat)
+            .setHTML(e.features[0].properties.ID)
+            .addTo(map);
+    });
+
+    // Change the cursor to a pointer when the mouse is over the states layer.
+    map.on('mouseenter', 'main', function (e) {
+        map.getCanvas().style.cursor = 'pointer';
+    });
+
+    // Change it back to a pointer when it leaves.
+    map.on('mouseleave', 'main', function () {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+    });
+}
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}

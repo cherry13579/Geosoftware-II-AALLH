@@ -672,7 +672,7 @@ class Csw2(object):
 
         LOGGER.info('getsimilaritybbox is running in csw2.py')
 
-        # 05.12.18, source: https://docs.python.org/3/library/sqlite3.html
+        # created on 05.12.18, source: https://docs.python.org/3/library/sqlite3.html
         # author: Aysel Tandik
         # connection to database 
         import sqlite3 # imported for connection on our own functions for the similarities functionalities 

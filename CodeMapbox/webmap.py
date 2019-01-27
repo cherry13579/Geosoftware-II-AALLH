@@ -31,10 +31,10 @@ def getCoordinates():
             dataInViewport.append(bbox)
 
     if not dataInViewport:
-        return json.dumps({'status': 'OK', 'table': "<tr><th>No data available for this region!</th></tr>"})
+        return json.dumps({'status': 'OK', 'table': "<tr><th>No data available for this region!</th></tr>", 'bboxen': None})
     table = createTable(dataInViewport)
-    # print(dataInViewport)
-    return json.dumps({'status': 'OK', 'table': table})
+    jsonBox = wkt2json(dataInViewport)
+    return json.dumps({'status': 'OK', 'table': table, 'bboxen': jsonBox})
     # return "hallo"
 
 
@@ -48,7 +48,8 @@ def getAllDataFromPycsw():
     row = c.fetchall()
 
     # print(row)
-    row = list(map(lambda a: {"ID": a[0], 'Creator': a[5], 'Title': a[2], 'Time begin': a[3], 'Time end': a[4], "bbox": a[1]}, row))
+    row = list(map(lambda a: {"ID": a[0], 'Creator': a[5], 'Title': a[2],
+                              'Time begin': a[3], 'Time end': a[4], "bbox": a[1]}, row))
     return row
 
 
@@ -67,6 +68,36 @@ def jsdata2wktgeo(bbox):
                'maxx': bbox['_ne']['lng'], 'maxy': bbox['_ne']['lat']}
     spatialExtent = spatialExtent % boxData
     return spatialExtent
+
+
+def wkt2json(wktGeometryList):
+    listOfBboxesList = list(map(lambda b: ((float(b[0][0]), float(b[0][1]), float(b[0][4]), float(b[0][5])), b[1]), map(lambda a: (a['bbox'].replace("POLYGON", "").replace(
+        "((", "").replace("))", "").replace(",", " ").split(), a['ID']), wktGeometryList)))
+
+    def toJson(data):
+        return {
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [data[0][0], data[0][1]],
+                        [data[0][0], data[0][3]],
+                        [data[0][2], data[0][3]],
+                        [data[0][2], data[0][1]],
+                        [data[0][0], data[0][1]]
+                    ]
+                ]
+            },
+            "properties": {
+                "ID": "<b>ID: %s</b>" % data[1],
+                "color": None
+            },
+        }
+
+    jsonBboxes = list(map(toJson, listOfBboxesList))
+
+    return jsonBboxes
 
 
 def createTable(values):
