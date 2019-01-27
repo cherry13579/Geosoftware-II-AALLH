@@ -117,38 +117,28 @@ def spatialDistance(bboxA, bboxB):
 
 
 def _generateGeometryFromBbox(bbox):
-    source = osr.SpatialReference()
-    source.ImportFromEPSG(4326)
 
-    target = osr.SpatialReference()
-    target.ImportFromEPSG(25832)
+    import pyproj
 
-    boxA = ogr.CreateGeometryFromJson("""{
-            "type":"Polygon",
-            "coordinates":[
-                [
-                    [
-                        %(minX)f,%(minY)f
-                    ],
-                    [
-                        %(minX)f,%(maxY)f
-                    ],
-                    [
-                        %(maxX)f,%(maxY)f
-                    ],
-                    [
-                        %(maxX)f,%(minY)f
-                    ],
-                    [
-                        %(minX)f,%(minY)f
-                    ]
-                ]
-            ]
-        }""" % ({'minX':bbox[0], 'minY':bbox[1], 'maxX':bbox[2], 'maxY':bbox[3]}))
+    source = pyproj.Proj(init='epsg:4326')
+    target = pyproj.Proj(init='epsg:25832')
+    minx1, miny1 = bbox[0], bbox[1]
+    maxx1, maxy1 = bbox[2], bbox[3]
+    minx2, miny2 = pyproj.transform(source, target, minx1, miny1)
+    maxx2, maxy2 = pyproj.transform(source, target, maxx1, maxy1)
 
+    boxA = ogr.CreateGeometryFromGML("""
+    <gml:Polygon xmlns:gml="http://www.opengis.net/gml" srsName="http://www.opengis.net/def/crs/EPSG/0/25832">
+        <gml:outerBoundaryIs>
+            <gml:LinearRing>
+                <gml:coordinates>
+                    %(minX)f,%(minY)f %(minX)f,%(maxY)f %(maxX)f,%(maxY)f %(maxX)f,%(minY)f %(minX)f,%(minY)f
+                </gml:coordinates>
+            </gml:LinearRing>
+        </gml:outerBoundaryIs>
+    </gml:Polygon>
+    """ % ({'minX':minx2, 'minY':miny2, 'maxX':maxx2, 'maxY':maxy2}))
 
-    # transform = osr.CoordinateTransformation(source, target)
-    # boxA.Transform(transform)
     return boxA
 
 def _getDistance(startingpoint, endpoint):
