@@ -216,7 +216,10 @@ def getTimeExtent(name, path):
         except:
             return (None, "File Error!")
         finally:
-            ds.close()
+            try:
+                ds.close()
+            except:
+                pass
 
     # def geoPackageCase(filepath):
     #     try:
