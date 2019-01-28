@@ -50,6 +50,10 @@ def getTimeExtent(name, path):
     #################################################################
 
     def netCDFCase(filepath):
+        """returns the temporal extent of a netCDF file
+        :param filepath full pathe to netCDF file
+        :returns: list with start, end and average intervall between dates 
+        """
         try:
             # https://gis.stackexchange.com/questions/270165/gdal-to-acquire-netcdf-like-metadata-structure-in-python
             ds = xr.open_dataset(filepath)
@@ -69,7 +73,7 @@ def getTimeExtent(name, path):
                 # avgInt = math.floor(avgInt*1000)/1000
                 # print(avgInt)
 
-            return ([isoTimeSeq[0].Date(), isoTimeSeq[-1].Date(), avgInt], None)
+            return ([isoTimeSeq[0].ISO(), isoTimeSeq[-1].ISO(), avgInt], None)
 
         # errors
         except KeyError:
@@ -78,8 +82,12 @@ def getTimeExtent(name, path):
             return (None, "File Error!")
 
     def CSVCase(filepath):
-        # column name should be either date, time or timestamp
-        # @see https://stackoverflow.com/questions/16503560/read-specific-columns-from-a-csv-file-with-csv-module
+        """returns the temporal extent of a CSV file
+        column name should either be date, time or timestamp
+        :see https://stackoverflow.com/questions/16503560/read-specific-columns-from-a-csv-file-with-csv-module
+        :param filepath full pathe to CSV file
+        :returns: list with start, end and average intervall between dates 
+        """
         try:  # finding the correct columns for latitude and longitude
             csvfile = open(filepath)
             head = csv.reader(csvfile, delimiter=' ', quotechar='|')
@@ -112,6 +120,7 @@ def getTimeExtent(name, path):
         # if no error accured
         else:
             try:
+                # create temporal file with correctly seperated columns
                 with tempfile.TemporaryDirectory() as tmpdirname:
                     curDir = os.getcwd()
                     os.chdir(tmpdirname)
@@ -125,8 +134,11 @@ def getTimeExtent(name, path):
                 # get time from found columns
                 timestamp = df[time].tolist()
 
+                # convert time to ISO time
                 isoTimeSeq = list(map(DateTime, (list(map(str, timestamp)))))
                 isoTimeSeq.sort()
+
+                # calculate average intervall between each measurement
                 avgInt = 0
                 if len(isoTimeSeq) > 1:
                     interval = []
@@ -137,17 +149,22 @@ def getTimeExtent(name, path):
                 avgInt = functools.reduce(
                     lambda x, y: x + y, interval) / float(len(interval))
 
-                return ([isoTimeSeq[0].Date(), isoTimeSeq[-1].Date(), avgInt], None)
+                return ([isoTimeSeq[0].ISO(), isoTimeSeq[-1].ISO(), avgInt], None)
 
             # errors
             except:
                 return (None, "File Error: File not found or check if your csv file is valid to 'csv on the web'")
 
     def geojsonCase(filepath):
+        """returns the temporal extent of a GeoJSON file
+        :param filepath full pathe to GeoJSON file
+        :returns: list with start, end and average intervall between dates 
+        """
         try:
             ds = open(filepath)
             jsonDict = json.load(ds)
             isoTimeSeq = []
+            # search for time/date/dateTime/timestamp features --> properties
             if jsonDict["type"] == "FeatureCollection":
                 prop = ""
                                     
@@ -157,14 +174,18 @@ def getTimeExtent(name, path):
                     prop = "date"
                 elif "dateTime" in jsonDict["features"][0]["properties"]:
                     prop = "dateTime"
+                elif "timestamp" in jsonDict["features"][0]["properties"]:
+                    prop = "timestamp"
                 else:
                     return (None, "no time data available")
 
+                # go through each feature and save the time propertie
                 timeext = []
                 for feature in jsonDict["features"]:
                     timeext.append(feature["properties"][prop])
                 isoTimeSeq = list(map(DateTime, timeext))
 
+                # calculate average intervall between features
                 isoTimeSeq.sort()
                 avgInt = 0
                 if len(isoTimeSeq) > 1:
@@ -176,7 +197,8 @@ def getTimeExtent(name, path):
                     avgInt = functools.reduce(
                         lambda x, y: x + y, interval) / float(len(interval))
 
-                return ([isoTimeSeq[0].Date(), isoTimeSeq[-1].Date(), avgInt], None)
+                return ([isoTimeSeq[0].ISO(), isoTimeSeq[-1].ISO(), avgInt], None)
+            # If GeoJSON is not a FeatureCollection
             else:
                 prop = ""
                 if "time" in jsonDict:
@@ -190,11 +212,14 @@ def getTimeExtent(name, path):
 
                 timeext = jsonDict["properties"][prop]
                 timeext = DateTime(timeext)
-                return ([timeext.Date(), timeext.Date(), 0], None)
+                return ([timeext.ISO(), timeext.ISO(), 0], None)
         except:
             return (None, "File Error!")
         finally:
-            ds.close()
+            try:
+                ds.close()
+            except:
+                pass
 
     # def geoPackageCase(filepath):
     #     try:
@@ -216,8 +241,12 @@ def getTimeExtent(name, path):
     #             pass
 
     def ISOCase(filepath):
+        """returns the temporal extent of an ISO standardized file
+        :see https://gis.stackexchange.com/questions/39080/using-ogr2ogr-to-convert-gml-to-shapefile-in-python
+        :param filepath full pathe to file
+        :returns: list with start, end and average intervall between dates 
+        """
         try:
-            # @see https://gis.stackexchange.com/questions/39080/using-ogr2ogr-to-convert-gml-to-shapefile-in-python
             # convert the gml file to a GeoJSON file
             with tempfile.TemporaryDirectory() as tmpdirname:
                 curDir = os.getcwd()

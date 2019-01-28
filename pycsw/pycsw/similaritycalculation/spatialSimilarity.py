@@ -1,4 +1,5 @@
 from math import *
+import logging
 
 # add local modules folder
 # file_path = os.path.join('..', 'Python_Modules')
@@ -6,6 +7,8 @@ from math import *
 
 from osgeo import gdal, ogr, osr
 # from subprocess import Popen, PIPE
+
+LOGGER = logging.getLogger(__name__)
 
 def spatialOverlap(bboxA, bboxB):
     # get Boundingboxes as Geometries
@@ -25,15 +28,18 @@ def spatialOverlap(bboxA, bboxB):
         boxB = boxB.Buffer(bufferDist)
         areaB = boxB.GetArea() 
 
-
     largerArea = areaA if areaA >= areaB else areaB
 
-    intersection = boxA.Intersection(boxB)
+    print(boxA)
+    print(boxB)
+
+    intersection = boxA.Union(boxB)
     intersectGeometry = ogr.CreateGeometryFromWkt(intersection.ExportToWkt())
 
     intersectArea = intersectGeometry.GetArea()
 
-    # print(intersectArea)
+    print(intersectArea)
+
 
     reachedPercentArea = intersectArea/largerArea
 
@@ -111,38 +117,28 @@ def spatialDistance(bboxA, bboxB):
 
 
 def _generateGeometryFromBbox(bbox):
-    source = osr.SpatialReference()
-    source.ImportFromEPSG(4326)
 
-    target = osr.SpatialReference()
-    target.ImportFromEPSG(25832)
+    import pyproj
 
-    boxA = ogr.CreateGeometryFromJson("""{
-            "type":"Polygon",
-            "coordinates":[
-                [
-                    [
-                        %(minX)f,%(minY)f
-                    ],
-                    [
-                        %(minX)f,%(maxY)f
-                    ],
-                    [
-                        %(maxX)f,%(maxY)f
-                    ],
-                    [
-                        %(maxX)f,%(minY)f
-                    ],
-                    [
-                        %(minX)f,%(minY)f
-                    ]
-                ]
-            ]
-        }""" % ({'minX':bbox[0], 'minY':bbox[1], 'maxX':bbox[2], 'maxY':bbox[3]}))
+    source = pyproj.Proj(init='epsg:4326')
+    target = pyproj.Proj(init='epsg:25832')
+    minx1, miny1 = bbox[0], bbox[1]
+    maxx1, maxy1 = bbox[2], bbox[3]
+    minx2, miny2 = pyproj.transform(source, target, minx1, miny1)
+    maxx2, maxy2 = pyproj.transform(source, target, maxx1, maxy1)
 
+    boxA = ogr.CreateGeometryFromGML("""
+    <gml:Polygon xmlns:gml="http://www.opengis.net/gml" srsName="http://www.opengis.net/def/crs/EPSG/0/25832">
+        <gml:outerBoundaryIs>
+            <gml:LinearRing>
+                <gml:coordinates>
+                    %(minX)f,%(minY)f %(minX)f,%(maxY)f %(maxX)f,%(maxY)f %(maxX)f,%(minY)f %(minX)f,%(minY)f
+                </gml:coordinates>
+            </gml:LinearRing>
+        </gml:outerBoundaryIs>
+    </gml:Polygon>
+    """ % ({'minX':minx2, 'minY':miny2, 'maxX':maxx2, 'maxY':maxy2}))
 
-    transform = osr.CoordinateTransformation(source, target)
-    boxA.Transform(transform)
     return boxA
 
 def _getDistance(startingpoint, endpoint):

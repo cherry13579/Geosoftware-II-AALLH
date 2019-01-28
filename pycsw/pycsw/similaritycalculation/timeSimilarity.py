@@ -1,6 +1,11 @@
 from math import floor
-
 from DateTime import DateTime
+import logging
+
+LOGGER = logging.getLogger(__name__)
+#LOGGER.info()
+#LOGGER.debug()
+#LOGGER.warning()
 
 def timeLength(timeA, timeB):
     startA = DateTime(timeA[0])

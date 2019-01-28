@@ -48,6 +48,12 @@ from pycsw.core import util
 from pycsw.core.etree import etree
 from pycsw.core.etree import PARSER
 
+# import a²hl² similarity calculation 
+from pycsw.similaritycalculation import similaritycalculation
+
+# import a²hl² delete similarities
+from pycsw.similaritycalculation import deletesimilarities
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -299,13 +305,21 @@ class Repository(object):
             self.session.begin()
             self.session.add(record)
             self.session.commit()
+
+            # @author: Anika Graupner
+            # start similarity calculation for the inserted record 
+            sentid = getattr(record,
+            self.context.md_core_model['mappings']['pycsw:Identifier'])
+            LOGGER.info('Start similaritycalculation for the inserted record %r' % (sentid))
+            similaritycalculation.similaritycalculation(sentid)
+
         except Exception as err:
             self.session.rollback()
             raise
 
     def update(self, record=None, recprops=None, constraint=None):
         ''' Update a record in the repository based on identifier '''
-
+        
         if record is not None:
             identifier = getattr(record,
             self.context.md_core_model['mappings']['pycsw:Identifier'])
@@ -325,6 +339,13 @@ class Repository(object):
                 self._get_repo_filter(self.session.query(self.dataset)).filter_by(
                 identifier=identifier).update(update_dict, synchronize_session='fetch')
                 self.session.commit()
+
+                # @author: Anika Graupner
+                # start similarity calculation for the updated record (update full)
+                sentid = identifier
+                LOGGER.info('Start similaritycalculation for the full updated record %r' % (sentid))
+                similaritycalculation.similaritycalculation(sentid)
+
             except Exception as err:
                 self.session.rollback()
                 msg = 'Cannot commit to repository'
@@ -359,6 +380,12 @@ class Repository(object):
                             self.dataset, self.context.md_core_model['mappings']['pycsw:XML']))
                         }, synchronize_session='fetch')
                 self.session.commit()
+                
+                # @author: Anika Graupner
+                # start similarity calculation for the updated record (update record property)
+                sentid = constraint['values'][0]
+                LOGGER.info('Start similaritycalculation for the based on record property updated record %r' % (sentid))
+                similaritycalculation.similaritycalculation(sentid)
 
                 return rows
             except Exception as err:
@@ -391,6 +418,15 @@ class Repository(object):
                     synchronize_session='fetch')
 
             self.session.commit()
+
+            # @author: Anika Graupner 
+            # delete also the records for the deleted record in the similarities table
+            sentid = constraint['values'][0]
+            LOGGER.info('Start the deleteSimilarities function from repository.py def delete.')
+            print(sentid)
+            print(constraint)
+            deletesimilarities.deleteSimilarities(sentid, constraint)
+
         except Exception as err:
             self.session.rollback()
             msg = 'Cannot commit to repository'

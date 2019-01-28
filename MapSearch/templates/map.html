@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block content %}
+<div id="overlay"></div>
+<div class="center">
+    <h1>Find your records on the map!</h1>
+    <h3>Draw a Polygon or zoom to your wished position and click <br/> the corrosponding button to view your records within that area!</h3>
+
+    <button id="bounds" class="button">Get Geodata in viewport</button>
+    <button id="polygon" class="button">Get Geodata within polygons</button>
+    <button id="toTop" class="button navi"><i class="fas fa-arrow-up" style='font-size:36px'></i></button>
+    <button id="toBottom" class="button navi"><i class="fas fa-arrow-down" style='font-size:36px'></i></button>
+</div>
+<div id="map"></div>
+<div id="resultDiv" style="display:none; overflow-x:auto; overflow-y:auto">
+    <table id="resultTable"></table>
+</div>
+
+{% endblock %}
