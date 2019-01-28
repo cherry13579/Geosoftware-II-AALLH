@@ -49,10 +49,10 @@ from pycsw.core.etree import etree
 from pycsw.core.etree import PARSER
 
 # import a²hl² similarity calculation 
-from pycsw.similaritycalculation import similaritycalculation
+from pycsw.core import similaritycalculation
 
 # import a²hl² delete similarities
-from pycsw.similaritycalculation import deletesimilarities
+from pycsw.core import deletesimilarities
 
 LOGGER = logging.getLogger(__name__)
 
