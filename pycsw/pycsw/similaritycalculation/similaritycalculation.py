@@ -19,7 +19,7 @@ def similaritycalculation(id1):
     LOGGER.info('Similaritycalculation started.')
 
     # connection to the database 
-    conn = sqlite3.connect(os.path.join('..', '..', 'db-data', 'data.db')) 
+    conn = sqlite3.connect(os.path.join('db-data', 'data.db')) 
     LOGGER.debug(conn)
     c = conn.cursor()
 
