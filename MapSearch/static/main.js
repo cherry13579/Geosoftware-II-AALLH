@@ -32,11 +32,29 @@ map.addControl(new mapboxgl.GeolocateControl({
     trackUserLocation: true
 }));
 
+var draw = new MapboxDraw({
+    displayControlsDefault: false,
+    controls: {
+        polygon: true,
+        trash: true
+    }
+});
+map.addControl(draw);
+
+
 $(document).ready(function () {
     $("#bounds").click(function () {
         $("#resultDiv").hide();
         // $("#info").text(JSON.stringify(map.getBounds()));
         sendToFlask(JSON.stringify(map.getBounds()));
+    });
+});
+
+$(document).ready(function () {
+    $("#polygon").click(function () {
+        $("#resultDiv").hide();
+        // $("#info").text(JSON.stringify(map.getBounds()));
+        sendToFlask(JSON.stringify(draw.getAll()));
     });
 });
 
@@ -64,7 +82,7 @@ function sendToFlask(bbox) {
             $("#resultDiv").show();
 
             $([document.documentElement, document.body]).animate({
-                scrollTop: $("#bounds").offset().top
+                scrollTop: $("#resultDiv").offset().top
             }, 1000);
         },
         error: function (xhr) {
@@ -107,7 +125,7 @@ function displayBboxen(listOfJsonBboxes) {
         "type": "FeatureCollection",
         "features": listOfJsonBboxes
     }
-    console.log(geoJsonData);
+    // console.log(geoJsonData);
 
     map.addLayer({
         id: 'main',
