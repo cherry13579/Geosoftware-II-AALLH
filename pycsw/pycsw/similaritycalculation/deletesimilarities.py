@@ -15,7 +15,7 @@ def deleteSimilarities(id, constraint):
     LOGGER.info('DeleteSimilarities is running for the record with the id %r' % (id))
 
     # connection to the database 
-    conn = sqlite3.connect(os.path.join('..', '..', 'db-data', 'data.db')) 
+    conn = sqlite3.connect(os.path.join('db-data', 'data.db')) 
     LOGGER.debug(conn)
     c = conn.cursor()
 
