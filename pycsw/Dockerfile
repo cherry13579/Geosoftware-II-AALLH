@@ -78,15 +78,63 @@ RUN pip3 install --upgrade pip setuptools \
 
 RUN apk add --no-cache \
     --repository http://dl-cdn.alpinelinux.org/alpine/edge/main/ \
-    #--allow-untrusted \
     libcrypto1.1 \
     && apk add --no-cache \
-    --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ \
-    #--allow-untrusted \
-    gdal \
-    gdal-dev
+    #--repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ \
+    #gdal \
+    #gdal-dev \
+    geos \
+    geos-dev \
+    # list from https://git.alpinelinux.org/aports/tree/testing/gdal/APKBUILD?id=310ab1f4c74a1c3fd98d9baabf7e9c2c7b5f605b
+    curl-dev \
+	  giflib-dev \
+	  jpeg-dev \
+	  libjpeg-turbo-dev \
+	  libpng-dev \
+	  linux-headers \
+	  postgresql-dev \
+	  #python2-dev \
+	  python3-dev \
+	  sqlite-dev \
+	  swig \
+	  tiff-dev \
+	  zlib-dev
 
-RUN pip3 install gdal
+# Problem: gdal aus alpine/edge/testing hat kein GEOS support
+# Lösung: gdal zusätlich aus sourcen compilieren (dependencies sollten ja da sein), Version 2.4.0.0, Anleitung: https://trac.osgeo.org/gdal/wiki/BuildingOnUnix
+
+ENV pkgname=gdal
+ENV pkgver=2.4.0
+
+WORKDIR /gdal
+
+RUN wget http://download.osgeo.org/$pkgname/$pkgver/$pkgname-$pkgver.tar.xz \
+  && unxz $pkgname-$pkgver.tar.xz \
+  && tar xf $pkgname-$pkgver.tar
+
+WORKDIR /gdal/$pkgname-$pkgver
+
+# based on https://git.alpinelinux.org/aports/tree/testing/gdal/APKBUILD?id=310ab1f4c74a1c3fd98d9baabf7e9c2c7b5f605b
+RUN	./configure --prefix=/usr \
+  --with-curl=/usr/bin/curl-config \
+  --with-geos=/usr/bin/geos-config \
+  && make
+# output includes
+#NetCDF support:            no
+# see also: https://bugs.alpinelinux.org/issues/8080
+# https://bugs.alpinelinux.org/projects/alpine/search?utf8=%E2%9C%93&scope=subprojects&issues=1&q=gdal
+
+#RUN swig/python \
+#  && python3 setup.py build
+
+RUN make install
+
+# maybe this helps: https://github.com/nodejs/docker-node/issues/752
+# maybe cleanup: RUN cd .. && rm -rf gdal-${GDAL_VERSION}*
+
+RUN pip3 install pygdal
+
+WORKDIR /tmp/pycsw
 
 COPY pycsw pycsw/
 COPY bin bin/
@@ -127,3 +175,14 @@ ENTRYPOINT [\
   "python3", \
   "/usr/local/bin/entrypoint.py" \
 ]
+
+# Test gdal in Python
+#/gdal/gdal-2.4.0 # python3
+#Python 3.5.2 (default, Dec 20 2016, 17:58:45)
+#[GCC 5.3.0] on linux
+#Type "help", "copyright", "credits" or "license" for more information.
+#>>> from osgeo import gdal, ogr
+#>>> box1 = ogr.CreateGeometryFromWkt("POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))")
+#>>> box2 = ogr.CreateGeometryFromWkt("POLYGON ((10 20, 30 30, 30 40, 20 30, 10 20))")
+#>>> box1.Intersection(box2).ExportToWkt()
+#'POLYGON ((30 40,30 30,10 20,20 30,30 40))'

@@ -1,5 +1,7 @@
 import math
+import logging
 
+LOGGER = logging.getLogger(__name__)
 
 def sameDatatype(fileEnding1, fileEnding2):
     print(fileEnding1, fileEnding2)
@@ -24,7 +26,7 @@ def similarTitle(title1, title2):
                 countList += title1.count(i)
         percent = 0
         if len(title1) != 0:
-            percent = countList*100/len(title1)
+            percent = countList/len(title1)
             percent = math.floor(percent*100)/100
         return percent
     else:
@@ -35,7 +37,7 @@ def similarTitle(title1, title2):
                 countList += title2.count(i)
         percent = 0
         if len(title2) != 0:
-            percent = countList*100/len(title2)
+            percent = countList/len(title2)
             percent = math.floor(percent*100)/100
         return percent
 
