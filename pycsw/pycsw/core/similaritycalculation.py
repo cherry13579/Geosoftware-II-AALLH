@@ -2,9 +2,9 @@ import logging
 import os
 import sqlite3
 from math import floor 
-from pycsw.similaritycalculation import timeSimilarity as ts
-from pycsw.similaritycalculation import spatialSimilarity as sps
-from pycsw.similaritycalculation import generalSimilarity as gs
+from pycsw.core import timeSimilarity as ts
+from pycsw.core import spatialSimilarity as sps
+from pycsw.core import generalSimilarity as gs
 
 LOGGER = logging.getLogger(__name__)
 
