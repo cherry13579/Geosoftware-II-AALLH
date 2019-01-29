@@ -20,7 +20,6 @@ def similaritycalculation(id1):
 
     # connection to the database 
     conn = sqlite3.connect(os.path.join('db-data', 'data.db')) 
-    LOGGER.debug(conn)
     c = conn.cursor()
 
     # test if there is only one record in the database
