@@ -31,7 +31,7 @@ def test_spatialdistance_Points():
 def test_spatialOverlap_Points():
     total = spatialSimilarity.spatialOverlap([13.0078125, 50.62507306341435, 13.0078125, 50.62507306341435], [
                                              13.0082125, 50.62513301341435, 13.0082125, 50.62513301341435])
-    assert math.floor(total * 100)/100 == 0.81
+    assert math.floor(total * 100)/100 == 0.96
 
 
 def test_similarArea_Points():
@@ -49,14 +49,13 @@ def test_spatialdistance_LineAndPoint():
 def test_spatialOverlap_LineAndPoint():
     total = spatialSimilarity.spatialOverlap([11.0078125, 50.62507306341435, 13.0078125, 50.62507306341435], [
                                              13.0082125, 50.62513301341435, 13.0082125, 50.62513301341435])
-    #assert math.floor(total * 100)/100 == 0.09
-    assert total == 0.09
+    assert math.floor(total * 10000)/10000 == 0.0002
 
 
 def test_similarArea_LineAndPoint():
     total = spatialSimilarity.similarArea([11.0078125, 50.62507306341435, 13.0078125, 50.62507306341435], [
                                           13.0082125, 50.62513301341435, 13.0082125, 50.62513301341435])
-    assert math.floor(total * 100)/100 == 1.0
+    assert math.floor(total * 100)/100 == 0.0
 
 ## Polygon and Point
 def test_spatialdistance_PolygonAndPoint():
@@ -129,4 +128,5 @@ def test_spatialOverlap_fABB():
 def test_similarArea_fABB():
     total = spatialSimilarity.similarArea(
         [7.596703, 51.950402, 7.656441, 51.978536], [-96.800194, 32.760085, -96.796353, 32.761385])
-    assert math.floor(total * 100)/100 == 0.42
+
+    assert math.floor(total * 10000)/10000 == 0.0032
