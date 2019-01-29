@@ -148,10 +148,10 @@ RUN pip3 install .
 COPY tests tests/
 COPY docker docker/
 
-ENV PYCSW_CONFIG=/etc/pycsw/pycsw.cfg
+ENV PYCSW_CONFIG=/etc/pycsw/aahll.cfg
 
 RUN mkdir /etc/pycsw \
-  && mv docker/pycsw.cfg ${PYCSW_CONFIG} \
+  && mv docker/aahll.cfg ${PYCSW_CONFIG} \
   && mkdir /var/lib/pycsw \
   && chown pycsw:pycsw /var/lib/pycsw \
   && cp docker/entrypoint.py /usr/local/bin/entrypoint.py \
@@ -168,6 +168,7 @@ WORKDIR /home/pycsw
 
 USER pycsw
 
+COPY db-data db-data/
 
 EXPOSE 8000
 
@@ -176,13 +177,4 @@ ENTRYPOINT [\
   "/usr/local/bin/entrypoint.py" \
 ]
 
-# Test gdal in Python
-#/gdal/gdal-2.4.0 # python3
-#Python 3.5.2 (default, Dec 20 2016, 17:58:45)
-#[GCC 5.3.0] on linux
-#Type "help", "copyright", "credits" or "license" for more information.
-#>>> from osgeo import gdal, ogr
-#>>> box1 = ogr.CreateGeometryFromWkt("POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))")
-#>>> box2 = ogr.CreateGeometryFromWkt("POLYGON ((10 20, 30 30, 30 40, 20 30, 10 20))")
-#>>> box1.Intersection(box2).ExportToWkt()
-#'POLYGON ((30 40,30 30,10 20,20 30,30 40))'
+

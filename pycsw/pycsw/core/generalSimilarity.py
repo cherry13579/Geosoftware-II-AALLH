@@ -42,7 +42,7 @@ def similarTitle(title1, title2):
                 charList.append(i)
                 # count how often the char appears in the other string
                 countList += title1.count(i)
-        LOGGER.info("List of same characters: " + charList)
+        LOGGER.info("List of same characters: " + str(charList))
 
         percent = 0
         if len(title1) != 0:
@@ -55,7 +55,7 @@ def similarTitle(title1, title2):
             if i not in charList:
                 charList.append(i)
                 countList += title2.count(i)
-        LOGGER.info("List of same characters: " + charList)
+        LOGGER.info("List of same characters: " + str(charList))
         
         percent = 0
         if len(title2) != 0:
