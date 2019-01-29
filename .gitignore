@@ -20,3 +20,5 @@ readme pycsw\.md
 CLI Tools/\.vscode/
 
 CLI Tools/__pycache__/
+
+pycsw

@@ -66,7 +66,6 @@ def similarArea(bboxA, bboxB):
 
     LOGGER.info("Area of bboxA: %f, Area of bboxB: %f" % (areaA, areaB))
 
-
     reachedPercentArea = 0
 
     # get percentage of equal area size
@@ -239,58 +238,58 @@ def _getMidPoint(bbox):
 
 ###############################################################################
 
-# Geometry
-print("\n Geometry \n")
-bbox1 = [13.0078125, 50.62507306341435, 5.44921875, 45.82879925192134]
-bbox2 = [17.7978515625, 52.09300763963822, 7.27294921875, 46.14939437647686]
-print(spatialDistance(bbox1, bbox2))
-print(spatialOverlap(bbox1, bbox2))
-print(similarArea(bbox1, bbox2))
+# # Geometry
+# print("\n Geometry \n")
+# bbox1 = [13.0078125, 50.62507306341435, 5.44921875, 45.82879925192134]
+# bbox2 = [17.7978515625, 52.09300763963822, 7.27294921875, 46.14939437647686]
+# print(spatialDistance(bbox1, bbox2))
+# print(spatialOverlap(bbox1, bbox2))
+# print(similarArea(bbox1, bbox2))
 
-# Points
-print("\n Points \n")
-bbox1 = [13.0078125, 50.62507306341435, 13.0078125, 50.62507306341435]
-bbox2 = [13.0082125, 50.62513301341435, 13.0082125, 50.62513301341435]
-print(spatialDistance(bbox1, bbox2))
-print(spatialOverlap(bbox1, bbox2))
-print(similarArea(bbox1, bbox2))
+# # Points
+# print("\n Points \n")
+# bbox1 = [13.0078125, 50.62507306341435, 13.0078125, 50.62507306341435]
+# bbox2 = [13.0082125, 50.62513301341435, 13.0082125, 50.62513301341435]
+# print(spatialDistance(bbox1, bbox2))
+# print(spatialOverlap(bbox1, bbox2))
+# print(similarArea(bbox1, bbox2))
 
-# Line and Point
-print("\n Line and Point \n")
-bbox1 = [10.0078125, 50.62507306341435, 13.0078125, 50.62507306341435]
-bbox2 = [13.0082125, 50.62513301341435, 13.0082125, 50.62513301341435]
-print(spatialDistance(bbox1, bbox2))
-print(spatialOverlap(bbox1, bbox2))
-print(similarArea(bbox1, bbox2))
+# # Line and Point
+# print("\n Line and Point \n")
+# bbox1 = [10.0078125, 50.62507306341435, 13.0078125, 50.62507306341435]
+# bbox2 = [13.0082125, 50.62513301341435, 13.0082125, 50.62513301341435]
+# print(spatialDistance(bbox1, bbox2))
+# print(spatialOverlap(bbox1, bbox2))
+# print(similarArea(bbox1, bbox2))
 
-# Polygon and Point
-print("\n Polygon and Point \n")
-bbox1 = [13.0078125, 50.62507306341435, 5.44921875, 45.82879925192134]
-bbox2 = [13.0082125, 50.62513301341435, 13.0082125, 50.62513301341435]
-print(spatialDistance(bbox1, bbox2))
-print(spatialOverlap(bbox1, bbox2))
-print(similarArea(bbox1, bbox2))
+# # Polygon and Point
+# print("\n Polygon and Point \n")
+# bbox1 = [13.0078125, 50.62507306341435, 5.44921875, 45.82879925192134]
+# bbox2 = [13.0082125, 50.62513301341435, 13.0082125, 50.62513301341435]
+# print(spatialDistance(bbox1, bbox2))
+# print(spatialOverlap(bbox1, bbox2))
+# print(similarArea(bbox1, bbox2))
 
-# Same BoundingBox
-print("\n Same BoundingBox \n")
-bbox1 = [124.99553571, 67.99553636, 165.00445788, 72.00446429]
-bbox2 = [124.99553571, 67.99553636, 165.00445788, 72.00446429]
-print(spatialDistance(bbox1, bbox2))
-print(spatialOverlap(bbox1, bbox2))
-print(similarArea(bbox1, bbox2))
+# # Same BoundingBox
+# print("\n Same BoundingBox \n")
+# bbox1 = [124.99553571, 67.99553636, 165.00445788, 72.00446429]
+# bbox2 = [124.99553571, 67.99553636, 165.00445788, 72.00446429]
+# print(spatialDistance(bbox1, bbox2))
+# print(spatialOverlap(bbox1, bbox2))
+# print(similarArea(bbox1, bbox2))
 
-# Ähnliche BoundingBox, die nah beieinander liegt
-print("\n Similar Bounding Box which are close to each other \n")
-bbox1 = [7.596703,51.950402,7.656441,51.978536]
-bbox2 = [7.588205,51.952412,7.616014,51.967644]
-print(spatialDistance(bbox1, bbox2))
-print(spatialOverlap(bbox1, bbox2))
-print(similarArea(bbox1, bbox2))
+# # Ähnliche BoundingBox, die nah beieinander liegt
+# print("\n Similar Bounding Box which are close to each other \n")
+# bbox1 = [7.596703,51.950402,7.656441,51.978536]
+# bbox2 = [7.588205,51.952412,7.616014,51.967644]
+# print(spatialDistance(bbox1, bbox2))
+# print(spatialOverlap(bbox1, bbox2))
+# print(similarArea(bbox1, bbox2))
 
-# Weit entfernte Boundingboxen
-print("\n Not so related Bounding Box \n")
-bbox1 = [7.596703,51.950402,7.656441,51.978536]
-bbox2 = [-96.800194,32.760085,-96.796353,32.761385]
-print(spatialDistance(bbox1, bbox2))
-print(spatialOverlap(bbox1, bbox2))
-print(similarArea(bbox1, bbox2))
+# # Weit entfernte Boundingboxen
+# print("\n Not so related Bounding Box \n")
+# bbox1 = [7.596703,51.950402,7.656441,51.978536]
+# bbox2 = [-96.800194,32.760085,-96.796353,32.761385]
+# print(spatialDistance(bbox1, bbox2))
+# print(spatialOverlap(bbox1, bbox2))
+# print(similarArea(bbox1, bbox2))
