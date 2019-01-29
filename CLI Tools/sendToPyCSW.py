@@ -8,8 +8,8 @@ import time as timeModule
 import requests
 import os
 
-import getBoundingBox as box
-import getTimeExtent as timeext
+from geodataExtent import getBoundingBox as box
+from geodataExtent import getTimeExtent as timeext
 
 
 # asking for parameters in command line
@@ -17,13 +17,11 @@ import getTimeExtent as timeext
 @click.option('--path', prompt="Please enter path to Folder", help='Path to Folder containing Geofiles')
 @click.option('--name', prompt="File name", help="Filename with extension")
 @click.option('--id', '-i', 'ident', prompt="Please enter correct file ID for PyCSW", help="PyCSW ID of corrosponding file")
-def main(path, name, ident):
-    """CLI-Tool for extracting the spatial and temporal extant of a selected Geodile and sends the results to the corrosponding ID in PyCSW to update the entery.
-    @param path     Text/Path: Path to the folder with Geodata
-    @param name     Text: Filename
-    @param id       Text: ID of the entery in PyCSW
+@click.option('--url', '-u', default='http://localhost:8000/csw', help="If you have a different URL to your pycsw, you can change it using this option")
+def main(path, name, ident, url):
+    """CLI-Tool for extracting the spatial and temporal extant of a selected Geodile and sends the results to the corrosponding ID in PyCSW to update the entery. 
 
-    Returns the XML Response of PyCSW after the update in the consloe
+    \nReturns the XML Response of PyCSW after the update in the consloe
     """
 
     def timeOption(path, name):
@@ -105,16 +103,13 @@ def main(path, name, ident):
 
     if type(time) is list:
         start, end = time[:2]
-        start = str(start)
-        end = str(end)
     else:
         click.echo(time, err=True)
 
     
 
     xml = builtXML(spatialExtent, start, end, ident, file_extension)
-    print(xml)
-    r = requests.post('http://localhost:8000/csw', data=xml)
+    r = requests.post(url, data=xml)
     click.echo(r.content)
 
 
