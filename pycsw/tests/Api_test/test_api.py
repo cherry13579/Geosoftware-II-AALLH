@@ -1,7 +1,9 @@
-# author: Aysel Tandik
-# Testing the API
-# Start 19.12.2018
-# source: http://qapage.com/Testing-an-API-with-Python/
+'''
+author: Aysel Tandik
+Testing the API
+created on: 19.12.2018
+source: http://qapage.com/Testing-an-API-with-Python/
+'''
 
 import unittest
 import datetime
@@ -9,59 +11,62 @@ import requests
 from requests import get
 
 class TestApi():
-    test_url = 'http://192.168.99.100:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=24'
-    test_urlBB = 'http://192.168.99.100:8000/?service=CSW&version=2.0.2&request=GetSimilarityBBox&idone=2&idtwo=24'
-    test_urlSimi = 'http://192.168.99.100:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=24&similar=1'
-    test_failedUrl = 'http://192.168.99.100:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id='
+    SimilarRecords = 'http://192.168.99.100:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=aahll:1'
+    SimilarRecords2 = 'http://192.168.99.100:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=aahll:1,aahll:2&similar=10&outputformat=application/json'
+    SimilarityBBox = 'http://192.168.99.100:8000/?service=CSW&version=2.0.2&request=GetSimilarityBBox&idone=aahll:8&idtwo=aahll:9'
+    UrlWithXML = 'http://192.168.99.100:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=aahll:1,aahll:2&similar=10&outputformat=application/xml'
+    UrlWithNoId = 'http://192.168.99.100:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id='
         
-    # Test--> if the schema has a json structure
-    def get_response(self, test_url1=test_url, format='json'):
+    # Test--> if the schema has a json structure, or xml
+    def get_response(self, test_url=SimilarRecords, format='json'):
         if format == 'json':
-            response = get(test_url1)
-            # response = get(self.test_urlBB)
+            response = get(test_url)
+        if format == 'xml':
+            response = get(test_url)
 
-            return response.json
+        return response.json
 
-    def test_json_response(self):
+    def test_jsonXml_response(self):
         print('Get json Response')
-        assert self.get_response(self.test_url, format='json') != 'xml'
-        assert self.get_response(self.test_urlBB, format='json') != 'xml'
-        assert self.get_response(self.test_urlSimi, format='json') != 'xml'
+        assert self.get_response(self.SimilarRecords, format='json') != 'xml'
+        assert self.get_response(self.SimilarRecords2, format='json') != 'xml'
+        assert self.get_response(self.SimilarityBBox, format='json') != 'xml'
+        assert self.get_response(self.UrlWithXML, format='xml') != 'json'
 
     # Test--> if the statuscode is 200
     def test_status_response(self):
         print('Get Statuscode')
-        response = requests.get(self.test_url)
+        response = requests.get(self.SimilarRecords)
         assert response.status_code == 200
 
-        response = requests.get(self.test_urlBB)
+        response = requests.get(self.SimilarRecords2)
         assert response.status_code == 200
 
-    # Test--> The Timeresponse from the Url's doesnt take longer then 200ms
+        response = requests.get(self.SimilarityBBox)
+        assert response.status_code == 200
+
+    # Test--> The Timeresponse from the Url's doesnt take longer then 500ms
     def test_time_response_Similarrecords(self):
-        r = requests.get(self.test_url, timeout=6)
+        r = requests.get(self.SimilarRecords, timeout=6)
         r.raise_for_status()
         responseTime = str(round(r.elapsed.total_seconds(),2))
-        assert responseTime < '200'
+        assert responseTime < '500'
         
     def test_time_response_SimilarBBox(self):
-        r = requests.get(self.test_urlBB, timeout=6)
+        r = requests.get(self.SimilarRecords2, timeout=6)
         r.raise_for_status()
         responseTime = str(round(r.elapsed.total_seconds(),2))
-        assert responseTime < '200'
+        assert responseTime < '500'
 
-        # def test_failedurl(self):
-        #     r = requests.get(self.test_failedUrl)
+        r = requests.get(self.SimilarityBBox, timeout=6)
+        r.raise_for_status()
+        responseTime = str(round(r.elapsed.total_seconds(),2))
+        assert responseTime < '500'
+
             
-        #     assert r == '{"@exceptionCode": "InvalidParameterValue","@locator": "id","ows:ExceptionText": "Invalid id parameter"}'
-        #     #r.headers['Content-Type'] == 'application/json'
-        #     #a = r.headers.get('content-type')
-        #     #assert a == 'application/json'
-        #     #response = reques
-        
-        
-        
-        #umgebungsvariable erstellen für die IP
-        #performance test pytesting - wegen 200ms 
-        #similar n testen - negative zahlen, buchstaben
-        
+    # missing one id parameter, but have right content-type and right format of JSON
+    def test_URL(self):
+        response = requests.get(self.UrlWithNoId)
+        assert response.status_code == 400
+        assert response.headers['Content-Type'] == "GetSimilarRecords"
+        assert self.get_response(self.UrlWithNoId, format='json') != 'xml'
