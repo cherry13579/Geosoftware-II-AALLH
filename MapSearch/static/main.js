@@ -43,20 +43,58 @@ map.addControl(draw);
 
 
 $(document).ready(function () {
-    $("#bounds").click(function () {
-        $("#resultDiv").hide();
-        // $("#info").text(JSON.stringify(map.getBounds()));
-        sendToFlask(JSON.stringify(map.getBounds()));
-    });
-});
-
-$(document).ready(function () {
     $("#polygon").click(function () {
         $("#resultDiv").hide();
         // $("#info").text(JSON.stringify(map.getBounds()));
         sendToFlask(JSON.stringify(draw.getAll()));
     });
+
+    $("#bounds").click(function () {
+        $("#resultDiv").hide();
+        // $("#info").text(JSON.stringify(map.getBounds()));
+        sendToFlask(JSON.stringify(map.getBounds()));
+    });
+
+    $("#toTop").click(function () {
+        $([document.documentElement, document.body]).animate({
+            scrollTop: $("#bounds").offset().top
+        }, 1000);
+    });
+
+    $("#toBottom").click(function () {
+        $([document.documentElement, document.body]).animate({
+            scrollTop: $("#resultTable").offset().top
+        }, 1000);
+    });
+
+    $('#resultTable').on('click', '.bbox', function () {
+        let value = $(this).html();
+        alert(showJson(value));
+    });
 });
+
+function showJson(wktGeom) {
+    let rawList = wktGeom.replace("POLYGON", "").replace("((", "").replace("))", "").split(/[ ,]+/);
+    let geojson = {
+        "type":"Feature",
+        "properties":{},
+        "geometry": {
+            "type":"Polygon",
+            "coordinates": [
+                [
+                    [rawList[0], rawList[1]],
+                    [rawList[2], rawList[3]],
+                    [rawList[4], rawList[5]],
+                    [rawList[6], rawList[7]],
+                    [rawList[8], rawList[9]]
+                ]
+            ]
+        }
+    }
+
+    return JSON.stringify(geojson);
+}
+
 
 function sendToFlask(bbox) {
     $.ajax({
@@ -97,22 +135,6 @@ $(document).ajaxStart(function () {
 
 $(document).ajaxStop(function () {
     $("#overlay").hide();
-});
-
-$(document).ready(function () {
-    $("#toBottom").click(function () {
-        $([document.documentElement, document.body]).animate({
-            scrollTop: $("#resultTable").offset().top
-        }, 1000);
-    });
-});
-
-$(document).ready(function () {
-    $("#toTop").click(function () {
-        $([document.documentElement, document.body]).animate({
-            scrollTop: $("#bounds").offset().top
-        }, 1000);
-    });
 });
 
 
