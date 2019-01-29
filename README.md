@@ -208,6 +208,7 @@ If the file started correctly, go in your Browser and to [localhost:5000](http:/
   - draw polygons over the locations you want your records from and hit the button *"get Geodata within Polygons"*
 
 You will get a table with all found records and a boundingbox drawn on the map.
+You can get a GeoJSON representation of a boundingbox if you click on that boundingbox in the table.
 
 
 
