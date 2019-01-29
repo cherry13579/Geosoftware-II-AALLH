@@ -156,6 +156,8 @@ http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarityBBox&idone
 Infos: 
 
 - You can use the ids from aahll:1 to aahll:18
+- you can add the outputformat=application/xml or outputformat=application/json paramter behind every endpoint, default is json
+
 
 
 ### Test with Postman ###
