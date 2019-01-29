@@ -183,7 +183,10 @@ def createTable(values):
         for dataset in values:
             content += "<tr>\n"
             for key in keys:
-                content += "    <td>%s</td>\n" % dataset[key]
+                if key == "bbox":
+                    content += "    <td class='bbox'>%s</td>\n" % dataset[key]
+                else:
+                    content += "    <td>%s</td>\n" % dataset[key]
             content += "</tr>\n"
     except KeyError as e:
         raise KeyError("dicts must have the same keys")
