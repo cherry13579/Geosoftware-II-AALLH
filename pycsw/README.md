@@ -1,4 +1,17 @@
-# A²HL²-pycsw README #
+# A²HL²-pycsw README # <!-- omit in toc -->
+
+- [Information about pycsw](#information-about-pycsw)
+- [Installation guide for A²HL²-pycsw](#installation-guide-for-a²hl²-pycsw)
+  - [Install from Code - Setting up a development environment with docker](#install-from-code---setting-up-a-development-environment-with-docker)
+    - [Installation on Windows with Docker (not Docker Toolbox)](#installation-on-windows-with-docker-not-docker-toolbox)
+    - [Installation on Windows with Docker Toolbox](#installation-on-windows-with-docker-toolbox)
+    - [Installation on MacOS](#installation-on-macos)
+    - [Installation in Linux](#installation-in-linux)
+    - [Important for every calculation (except with the batch file)](#important-for-every-calculation-except-with-the-batch-file)
+  - [Run image from docker-hub](#run-image-from-docker-hub)
+- [API Testsuite](#api-testsuite)
+  - [Test directly in Browser](#test-directly-in-browser)
+  - [Test with Postman](#test-with-postman)
 
 ## Information about pycsw ##
 
