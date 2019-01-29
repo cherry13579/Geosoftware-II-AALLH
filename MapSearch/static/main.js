@@ -42,16 +42,6 @@ var draw = new MapboxDraw({
 map.addControl(draw);
 
 
-map.on('draw.create', function() {
-    console.log(draw.getAll());
-});
-// map.on('draw.delete', updateArea);
-map.on('draw.update', function() {
-    console.log(draw.getAll());
-});
-
-
-
 $(document).ready(function () {
     $("#bounds").click(function () {
         $("#resultDiv").hide();
@@ -92,7 +82,7 @@ function sendToFlask(bbox) {
             $("#resultDiv").show();
 
             $([document.documentElement, document.body]).animate({
-                scrollTop: $("#bounds").offset().top
+                scrollTop: $("#resultDiv").offset().top
             }, 1000);
         },
         error: function (xhr) {
