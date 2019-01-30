@@ -1,0 +1,565 @@
+{
+	"info": {
+		"_postman_id": "8749e94e-e7ed-4499-9088-43507c575f6f",
+		"name": "Api_Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a8e61b7f-0282-4f53-af9c-fadf96035eb4",
+						"exec": [
+							"pm.test(\"Status code is 400\", function(){",
+							"    pm.response.to.have.status(400);",
+							"})",
+							"",
+							"pm.test(\"The Content-Type is JSON\"), function() {",
+							"    pm.getResponseHeader('Content-Type') ==='application/json';",
+							"}",
+							"",
+							"pm.test(\"Response time is less then 5000ms\"), function(){",
+							"    responseTime < 5000;",
+							"}",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "service",
+							"value": "CSW"
+						},
+						{
+							"key": "version",
+							"value": "2.0.2"
+						},
+						{
+							"key": "request",
+							"value": "GetSimilarRecords"
+						},
+						{
+							"key": "id",
+							"value": ""
+						}
+					]
+				},
+				"description": "GetSimiliarRecordTests"
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=aahll:1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a913bebc-4e7e-48c5-86a9-ee31d767c346",
+						"exec": [
+							"pm.test(\"Status code is 200\", function(){",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"pm.test(\"The Content-Type is JSON\"), function() {",
+							"    pm.getResponseHeader('Content-Type') ==='application/json';",
+							"}",
+							"",
+							"pm.test(\"Response time is less then 5000ms\"), function(){",
+							"    responseTime < 5000;",
+							"}",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=aahll:1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "service",
+							"value": "CSW"
+						},
+						{
+							"key": "version",
+							"value": "2.0.2"
+						},
+						{
+							"key": "request",
+							"value": "GetSimilarRecords"
+						},
+						{
+							"key": "id",
+							"value": "aahll:1"
+						}
+					]
+				},
+				"description": "GetSimilarRecords - which works"
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=aahll:1,aahll:2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "29ac46c5-888c-4bc4-bd49-f6bb0b92a35d",
+						"exec": [
+							"pm.test(\"Status code is 200\", function(){",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"pm.test(\"The Content-Type is JSON\"), function() {",
+							"    pm.getResponseHeader('Content-Type') ==='application/json';",
+							"}",
+							"",
+							"pm.test(\"Response time is less then 5000ms\"), function(){",
+							"    responseTime < 5000;",
+							"}",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=aahll:1,aahll:2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "service",
+							"value": "CSW"
+						},
+						{
+							"key": "version",
+							"value": "2.0.2"
+						},
+						{
+							"key": "request",
+							"value": "GetSimilarRecords"
+						},
+						{
+							"key": "id",
+							"value": "aahll:1,aahll:2"
+						}
+					]
+				},
+				"description": "with 2 IDs"
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=aahll:1,aahll:2&similar=10",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8efe57f2-445e-4f57-b2d3-1d7af7e783d6",
+						"exec": [
+							"pm.test(\"Status code is 200\", function(){",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"pm.test(\"The Content-Type is JSON\"), function() {",
+							"    pm.getResponseHeader('Content-Type') ==='application/json';",
+							"}",
+							"",
+							"pm.test(\"Response time is less then 5000ms\"), function(){",
+							"    responseTime < 5000;",
+							"}",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=aahll:1,aahll:2&similar=10",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "service",
+							"value": "CSW"
+						},
+						{
+							"key": "version",
+							"value": "2.0.2"
+						},
+						{
+							"key": "request",
+							"value": "GetSimilarRecords"
+						},
+						{
+							"key": "id",
+							"value": "aahll:1,aahll:2"
+						},
+						{
+							"key": "similar",
+							"value": "10"
+						}
+					]
+				},
+				"description": "with similar parameter"
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=aahll:1,aahll:2&similar=10&outputformat=application/json",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f3819286-5153-4c96-af50-3b13283d2370",
+						"exec": [
+							"pm.test(\"Status code is 200\", function(){",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"pm.test(\"The Content-Type is JSON\"), function() {",
+							"    pm.getResponseHeader('Content-Type') ==='application/json';",
+							"}",
+							"",
+							"pm.test(\"Response time is less then 5000ms\"), function(){",
+							"    responseTime < 5000;",
+							"}",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=aahll:1,aahll:2&similar=10&outputformat=application/json",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "service",
+							"value": "CSW"
+						},
+						{
+							"key": "version",
+							"value": "2.0.2"
+						},
+						{
+							"key": "request",
+							"value": "GetSimilarRecords"
+						},
+						{
+							"key": "id",
+							"value": "aahll:1,aahll:2"
+						},
+						{
+							"key": "similar",
+							"value": "10"
+						},
+						{
+							"key": "outputformat",
+							"value": "application/json"
+						}
+					]
+				},
+				"description": "application/json"
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=aahll:1,aahll:2&similar=10&outputformat=application/xml",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "21492b56-8198-4658-a2b0-7d22f8919abc",
+						"exec": [
+							"pm.test(\"Status code is 200\", function(){",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"pm.test(\"The Content-Type is XML\"), function() {",
+							"    pm.getResponseHeader('Content-Type') ==='application/xml';",
+							"}",
+							"",
+							"pm.test(\"Response time is less then 5000ms\"), function(){",
+							"    responseTime < 5000;",
+							"}",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=aahll:1,aahll:2&similar=10&outputformat=application/xml",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "service",
+							"value": "CSW"
+						},
+						{
+							"key": "version",
+							"value": "2.0.2"
+						},
+						{
+							"key": "request",
+							"value": "GetSimilarRecords"
+						},
+						{
+							"key": "id",
+							"value": "aahll:1,aahll:2"
+						},
+						{
+							"key": "similar",
+							"value": "10"
+						},
+						{
+							"key": "outputformat",
+							"value": "application/xml"
+						}
+					]
+				},
+				"description": "application xml"
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarityBBox&idone=aahll:8&idtwo=aahll:9",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f73bbd36-32b2-4ee6-b8aa-1a585826400b",
+						"exec": [
+							"pm.test(\"Status code is 200\", function(){",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"pm.test(\"The Content-Type is JSON\"), function() {",
+							"    pm.getResponseHeader('Content-Type') ==='application/json';",
+							"}",
+							"",
+							"pm.test(\"Response time is less then 5000ms\"), function(){",
+							"    responseTime < 5000;",
+							"}",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarityBBox&idone=aahll:8&idtwo=aahll:9",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "service",
+							"value": "CSW"
+						},
+						{
+							"key": "version",
+							"value": "2.0.2"
+						},
+						{
+							"key": "request",
+							"value": "GetSimilarityBBox"
+						},
+						{
+							"key": "idone",
+							"value": "aahll:8"
+						},
+						{
+							"key": "idtwo",
+							"value": "aahll:9"
+						}
+					]
+				},
+				"description": "SimilarityBBox"
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarityBBox&idone=aahll:1&idtwo=aahll:2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8ac24ce8-742a-438b-bc9d-24e53ac5cff5",
+						"exec": [
+							"pm.test(\"Status code is 200\", function(){",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"pm.test(\"The Content-Type is JSON\"), function() {",
+							"    pm.getResponseHeader('Content-Type') ==='application/json';",
+							"}",
+							"",
+							"pm.test(\"Response time is less then 5000ms\"), function(){",
+							"    responseTime < 5000;",
+							"}",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarityBBox&idone=aahll:1&idtwo=aahll:2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "service",
+							"value": "CSW"
+						},
+						{
+							"key": "version",
+							"value": "2.0.2"
+						},
+						{
+							"key": "request",
+							"value": "GetSimilarityBBox"
+						},
+						{
+							"key": "idone",
+							"value": "aahll:1"
+						},
+						{
+							"key": "idtwo",
+							"value": "aahll:2"
+						}
+					]
+				},
+				"description": "2Ids"
+			},
+			"response": []
+		}
+	]
+}
