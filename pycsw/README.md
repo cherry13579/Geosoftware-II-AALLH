@@ -162,7 +162,7 @@ Infos:
 
 ### Test with Postman ###
 
-Postman can help us to show how the API-Endpoint is working. Take the geojson-file and click import in Postman to import the file. Then you can choose the API-File from the left side and see which URL's are added. Under params, the keys are listed. So the URL will be splitted up in parts and in the paramstable you can see the information behind the keys. The GET - Requests have also tests. This test includes the statuscode, the right content-type (json) and the response time which should be under 5 seconds.
+Postman can help us to show how the API-Endpoint is working. Take the geojson-file and click import in Postman to import the file. Then you can choose the API-File from the left side and see which URL's are added. Under "params", the keys are listed. So the URL will be splitted up in parts and in the table of "params" you can see the information behind the keys. The GET - Requests have also tests. This test includes the statuscode, the right content-type (json) and the response time which should be under 5 seconds.
 
 
 
