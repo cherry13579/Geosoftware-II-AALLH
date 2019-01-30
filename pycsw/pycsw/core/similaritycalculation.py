@@ -76,24 +76,17 @@ def similaritycalculation(id1):
         conn.commit()
         LOGGER.info('Deleting records from similarities tables!')
 
-        print("hallo1")
-
         # select all important values from the database for similarity calculation except the values of the updated or inserted record, because the 
         # updated value will not be compared with hisself 
         c.execute("SELECT identifier, title, time_begin, time_end, creator, wkt_geometry, format FROM records")
         LOGGER.info('Getting important values from the database for similarity calculation except the values of the updated or inserted record')
         values = c.fetchall()
-
-        print("hallo2")
-        print(values)
         
         # for each record in the database (except the record with the id of the updated or inserted record)
         rows = []
         i = 0
         while i < len(values):
-            print("hallo schleife" + str(i))
             if values[i][0] == id1:
-                print("selbst vergleich")
                 i+=1
             
             # start comparing the updated or inserted record with all valid records in the database
@@ -101,7 +94,6 @@ def similaritycalculation(id1):
                 
                 # id of the respective record in the database
                 id2 = values[i][0]
-                print("current secon id %s"% id2)
                 
                 # weights for the total similarity of the similarity calculation
                 weight = {
@@ -134,10 +126,7 @@ def similaritycalculation(id1):
                     timeLength = ts.timeLength(timeA, timeB)*weight["time"]["length"]
                     timeOverlap = ts.timeOverlap(timeA, timeB)*weight["time"]["overlap"] 
 
-                    timeSimilarity = timeLength + timeOverlap
-
-                    print("time geschafft")
-                    
+                    timeSimilarity = timeLength + timeOverlap                    
                 
                 # if not it is not necessary to run the functions for the time similarity and the timeSimilarity is 0
                 else:
@@ -221,8 +210,6 @@ def similaritycalculation(id1):
                 i+=1
         
         # insert the calculated values into the database 
-        print("hallo3")
-        print(rows)
         for entry in rows:
         
             sql = """insert into similarities (record1, record2, total_similarity, geospatial_extent, temporal_extent, general_extent) 
@@ -232,7 +219,6 @@ def similaritycalculation(id1):
             conn.commit()
 
         LOGGER.info('Similarity calculation finished.')
-        print("hallo4")
             
     # if there was only one value in the database 
     else:

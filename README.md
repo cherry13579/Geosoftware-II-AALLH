@@ -5,8 +5,6 @@
 **Project order:** This project will close the gap between geospatial data formats and repositories respectively geospatial metadata catalogues and similarity measurements. Project groups will extend an existing Free and Open Source Software (FOSS) project with the functionality to retrieve and view similar records. This comprises both the API and UI, namely providing an HTTP endpoint to retrieve an ordered list of records based on a provided record and displaying/linking similar records in a detail view of a record respectively.
 
 ## Table of Contents <!-- omit in toc -->
-- [Instructions to start pycsw](#instructions-to-start-pycsw)
-  - [Test our additional features:](#test-our-additional-features)
 - [Using the CLI-Tools](#using-the-cli-tools)
     - [Installed using the code](#installed-using-the-code)
     - [Installed using pip](#installed-using-pip)
@@ -15,44 +13,6 @@
   - [Usage](#usage)
 - [Map based search of records](#map-based-search-of-records)
 
-## Instructions to start pycsw
-
-- install docker: [https://docs.docker.com/install/](https://docs.docker.com/install/)
-- clone our repository to your computer
-- make sure, docker is running
-- open Windows PowerShell (or Docker Toolbox) on your computer and navigate into the pycsw folder: 
-
-```bat
-cd <path>/pycsw
-```
-
-- add the following in PowerShell (just completely copy and paste)
-
-```docker
-docker run --name pycsw-dev --volume ${PWD}/pycsw:/usr/lib/python3.5/site-packages/pycsw --volume ${PWD}/docs:/home/pycsw/docs --volume ${PWD}/VERSION.txt:/home/pycsw/VERSION.txt --volume ${PWD}/LICENSE.txt:/home/pycsw/LICENSE.txt --volume ${PWD}/COMMITTERS.txt:/home/pycsw/COMMITTERS.txt --volume ${PWD}/CONTRIBUTING.rst:/home/pycsw/CONTRIBUTING.rst --volume ${PWD}/pycsw/plugins:/home/pycsw/pycsw/plugins --volume ${PWD}/aahll.cfg:/etc/pycsw/pycsw.cfg --volume ${PWD}/db-data:/db-data/ --publish 8000:8000 geopython/pycsw --reload
-```
-
-- sometimes you could get an input/output error, if so, simply restart Docker and try again
-- go to localhost:8000 in your browser, when you see a xml tree, everething went fine
-- to remove the container, add the following in powerShell (necessary if the container should be restarted with the above command):
-
-```shell
-docker rm -f pycsw-dev
-```
-
-### Test our additional features:
-
-- we added two own functions for the api in pycsw/pycsw/ogc/csw/csw2.py (for code review):
-	- `def getsimilarrecords(self)`
-	- `def getsimilaritybbox(self, raw=False)`
-
-In your Browser, test our new requests by adding the following endpoints:
-
-- http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=24
-- http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=24,6
-- http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarRecords&id=24,6&outputformat=application/xml
-- http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarityBBox&idone=24&idtwo=4
-- http://localhost:8000/?service=CSW&version=2.0.2&request=GetSimilarityBBox&idone=24&idtwo=4&outputformat=application/xml
   
 ## Using the CLI-Tools
 First you need to install the CLI-Tools. An installation guide is in the README inside the CLI Tools folder
@@ -208,6 +168,7 @@ If the file started correctly, go in your Browser and to [localhost:5000](http:/
   - draw polygons over the locations you want your records from and hit the button *"get Geodata within Polygons"*
 
 You will get a table with all found records and a boundingbox drawn on the map.
+You can get a GeoJSON representation of a boundingbox if you click on that boundingbox in the table.
 
 
 
